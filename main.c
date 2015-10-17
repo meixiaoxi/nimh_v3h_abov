@@ -629,10 +629,10 @@ void InitConfig()
     P2FSR   = 0x03;	   //             00000000
 
                                      //led4    led3    led1    led2    pwm3    RST    pwm2   pwm1
-    P3IO    = 0x27;         // out       out      out       out      out       out       out       out
+    P3IO    = 0xFF;         // out       out      out       out      out       out       out       out
     P3OD    = 0x00;        // PP         PP      PP         PP       PP         PP       PP       PP
     P3PU    = 0x00;         // off       off      off        off       off       off       off       off
-    P3	   = 0x00;	//00000000
+    P3	   = 0xF0;	//00000000
     P3FSR   = 0x00;		  // 0        0         0          0         0         0          0        0	
 }
 
@@ -650,10 +650,10 @@ void main()
 
 	WDTDR = 0xFF;
 	ClrWdt();
-
+	
 	//timer0   as system tick
-	T0DR = 128;
-	T0CR = 0x89;
+	T0DR = 0xFF;
+	T0CR = 0x8B;
 
 	//ADC
 	ADCCRH = 0x05;
@@ -662,7 +662,7 @@ void main()
 	//interrupt
 	IE = 0x00;
 	IE1 = 0x00;
-	IE2 = 0x01;    //enable timer0 overflow 
+	IE2 = 0x02;    //enable timer0 overflow 
 	IE3 = 0x00;
 	EIFLAG0 = 0;
 	EIFLAG1 = 0;
@@ -677,11 +677,11 @@ void main()
 
 	
 		LED_ON(1);
-		delay_ms(300);
+		delay_ms(100);
 		LED_OFF(1);
-		delay_ms(300);
+		delay_ms(100);
 		LED_ON(1);
-		delay_ms(300);
+		delay_ms(100);
 		LED_OFF(1);
 
 
@@ -812,7 +812,9 @@ void main()
 				}
 			}while(0);
 		}
-		
+
+		gOutputStatus = OUTPUT_STATUS_NORMAL;
+		gSysStatus = SYS_DISCHARGE_STATE;
 		ledHandler();
 		
 		ClrWdt();
@@ -824,7 +826,7 @@ void main()
 
 
 
-void T0_Int_Handler(void) interrupt 12
+void T0_Int_Handler(void) interrupt 13
 {
 	shortTick++;
 }

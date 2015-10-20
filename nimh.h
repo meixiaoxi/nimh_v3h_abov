@@ -13,8 +13,8 @@ typedef 	 unsigned long		u32;
 #define 		ClrWdt()		WDTCR = 0xE0
 
 #define 		GET_SYS_STATUS()	P1&0x01
-#define		CHANGE_TO_OUTPUT()		P0IO |= (1<<2), P02 = 0	
-#define		CHANGE_TO_INPUT()		P0IO &= ~(1<<2)
+#define		CHANGE_TO_OUTPUT()	(P0IO |= (1<<2),P02 = 0,P2IO |= (1<<4),P24 = 0)
+#define		CHANGE_TO_INPUT()		(P0IO &= ~(1<<2),P2IO &=~(1<<4))
 #define PWM_ON	1
 #define PWM_OFF	 0
 
@@ -137,7 +137,12 @@ typedef 	 unsigned long		u32;
 #define OUTPUT_STATUS_STOP	2
 #define MIN_VBAT_CHANNEL_1_IDLE	 2916  //(4.7/2=2.4V   2.4/3.3*4096)
 #define MIN_VBAT_OUPUT				620	//(1/2=0.5	0.5/3.3*4096)
+#define MIN_VBAT_OUTPUT_IDLE		620	// (1.3/2 = 0.65  0.65/3.3*4096)
 #define OUTPUT_CHECK_INTERVAL		31	//(500/16.384	31)
+
+#define	OUTPUT_SHOW_LEVEL_3		806	//(1.3/2  0.65/3.3*4096 )
+#define	OUTPUT_SHOW_LEVEL_2		775	//(1.25/2 0.625/3.3*4096)		
+
 
 #define ENABLE_BOOST()	P25=1
 #define DISABLE_BOOST()	P25=0

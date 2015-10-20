@@ -4,6 +4,7 @@ extern u8 gBatStateBuf[5];
 extern u8 gBatLeveL[4];
 extern u8 gSysStatus;
 extern u8 gOutputStatus;
+extern u16 gBatVoltArray[4][1];
 void LED_ON(u8 led)
 {
 	switch(led)
@@ -121,12 +122,21 @@ if(gSysStatus == SYS_CHARGING_STATE)
 	}
 }
 else
-{
+{	
 	if(gOutputStatus == OUTPUT_STATUS_NORMAL)
 	{
+		if(gBatVoltArray[1][0] > OUTPUT_SHOW_LEVEL_3)
+			gBatVoltArray[3][0] = 3;
+		else if(gBatVoltArray[1][0] > OUTPUT_SHOW_LEVEL_2)
+			gBatVoltArray[3][0] = 2;
+		else
+			gBatVoltArray[3][0] = 1;
+		if(gBatVoltArray[3][0] < gCount)
+			gCount = gBatVoltArray[3][0];
+		
 		if(getSysTick() & SHOW_CHARGING_TICK)
 		{
-			for(i=1;i<5;i++)
+			for(i=1;i<=gCount;i++)
 			{	
 				LED_ON(i);
 			}

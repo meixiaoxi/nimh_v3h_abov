@@ -42,14 +42,14 @@ u16 getAverage(u8 channel)
 	u16 temp,max,min,ret;
 
 
-	temp = getAdcValue(channel<<4);
+	temp = getAdcValue(channel);
 	ret= temp;
 	max =temp;
 	min = temp;
 	for(i=0;i<9;i++)
 	{
 		delay_us(200);
-		 temp = getAdcValue(channel<<4);
+		 temp = getAdcValue(channel);
 	 	if(temp > max)
 	 	{
 			max = temp;

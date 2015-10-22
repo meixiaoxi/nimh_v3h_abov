@@ -40,14 +40,18 @@ typedef 	 unsigned long		u32;
 #define BAT_DETECT_BIT						(1<<1)   //电池测试
 #define BAT_CHECK_BIT						(1<<0)   //有无电池
 
-#if 1
+
+#define LDO_LEVEL	4000
+
+#if (LDO_LEVEL == 3300)
+#warning "3.3v ldo"
 #define BAT_MIN_VOLT_33_OPEN	472		//(0.3/2.6)*4096
 #define BAT_MIN_VOLT_OPEN	372 			//(0.3/3.3)*4096
 #define BAT_MAX_VOLT_OPEN	2110		//(1.7/3.3)*4096
 
 #define BAT_MIN_VOLT_OPEN_SPE	372 			//(0.3/3.3)*4096
 
-#define BAT_MAX_VOLT_CLOSE 2358		//(1.9/3.3*4096)        (1.8/3.3)*4096	
+#define BAT_MAX_VOLT_CLOSE 2482		//(2/3.3*4096)        (1.8/3.3)*4096	
 #define BAT_MAX_VOLT_CLOSE_CHANNEL_4		2234	//(1.8/3.3)*4096
 
 
@@ -62,7 +66,53 @@ typedef 	 unsigned long		u32;
 
 #define DV_ENABLE_MIN_VOLT		1799						//  (1.45/3.3)*4096
 
-#else
+//output
+#define MIN_VBAT_CHANNEL_1_IDLE	 2916  //(4.7/2=2.4V   2.4/3.3*4096)
+#define MIN_VBAT_OUPUT				620	//(1/2=0.5	0.5/3.3*4096)
+#define MIN_VBAT_OUTPUT_IDLE		620	// (1.3/2 = 0.65  0.65/3.3*4096)
+#define	OUTPUT_SHOW_LEVEL_3		806	//(1.3/2  0.65/3.3*4096 )
+#define	OUTPUT_SHOW_LEVEL_2		775	//(1.25/2 0.625/3.3*4096)	
+
+//temperature adc
+#define 	ADC_TEMP_MAX	1069    //55
+#define	ADC_TEMP_MIN	3007	//0
+
+#elif (LDO_LEVEL == 4000)
+#warning "4v ldo"
+#define BAT_MIN_VOLT_OPEN	307 			//(0.3/4)*4096
+#define BAT_MAX_VOLT_OPEN	1740		//(1.7/4)*4096
+
+#define BAT_MIN_VOLT_OPEN_SPE	307 			//(0.3/4)*4096
+
+#define BAT_MAX_VOLT_CLOSE 2048		//(2/4*4096)
+#define BAT_MAX_VOLT_CLOSE_CHANNEL_4		1843	//(1.8/4)*4096
+
+
+#define BAT_LEVEL_LOW_TO_MIDD		1433			// 1.4     (1.4/4)*4096
+#define BAT_LEVEL_MIDD_TO_HIGH		1443				//  1.41	(1.41/4)*4096
+
+#define CHARGING_PRE_END_VOLT		921			//(0.9/4)*4096
+#define CHARGING_FAST_END_VOLT	1484			//(1.45/4)*4096
+#define CHARGING_FAST_MAX_VOLT	1638			//(1.6/4)*4096
+
+#define CHARGING_FAST_TEMP_END_VOLT	1484			// (1.45/4)*4096
+
+#define DV_ENABLE_MIN_VOLT		1484						//  (1.45/4)*4096
+
+//output
+#define MIN_VBAT_CHANNEL_1_IDLE	 2457  //(4.7/2=2.4V   2.4/4*4096)
+#define MIN_VBAT_OUPUT				512	//(1/2=0.5	0.5/4*4096)
+#define MIN_VBAT_OUTPUT_IDLE		665	// (1.3/2 = 0.65  0.65/4*4096)
+#define	OUTPUT_SHOW_LEVEL_3		665	//(1.3/2  0.65/4*4096 )
+#define	OUTPUT_SHOW_LEVEL_2		640	//(1.25/2 0.625/4*4096)
+
+
+//temperature adc
+#define 	ADC_TEMP_MAX	1069    //55
+#define	ADC_TEMP_MIN	3007	//0
+#endif
+
+#if 0
 #define BAT_MIN_VOLT_33_OPEN	472		//(0.3/2.6)*4096
 #define BAT_MIN_VOLT_OPEN	186 			//(0.3/3.3)*4096
 #define BAT_MAX_VOLT_OPEN	1055		//(1.7/3.3)*4096
@@ -121,8 +171,6 @@ typedef 	 unsigned long		u32;
 
 #define CHANNEL_20_RES	9
 
-#define 	ADC_TEMP_MAX	1069    //55
-#define	ADC_TEMP_MIN	3007	//0
 
 #define BAT_VALID_VALUE	787
 
@@ -135,13 +183,8 @@ typedef 	 unsigned long		u32;
 #define OUTPUT_STATUS_WAIT	0
 #define OUTPUT_STATUS_NORMAL	1
 #define OUTPUT_STATUS_STOP	2
-#define MIN_VBAT_CHANNEL_1_IDLE	 2916  //(4.7/2=2.4V   2.4/3.3*4096)
-#define MIN_VBAT_OUPUT				620	//(1/2=0.5	0.5/3.3*4096)
-#define MIN_VBAT_OUTPUT_IDLE		620	// (1.3/2 = 0.65  0.65/3.3*4096)
-#define OUTPUT_CHECK_INTERVAL		31	//(500/16.384	31)
 
-#define	OUTPUT_SHOW_LEVEL_3		806	//(1.3/2  0.65/3.3*4096 )
-#define	OUTPUT_SHOW_LEVEL_2		775	//(1.25/2 0.625/3.3*4096)		
+#define OUTPUT_CHECK_INTERVAL		31	//(500/16.384	31)	
 
 
 #define ENABLE_BOOST()	P25=1

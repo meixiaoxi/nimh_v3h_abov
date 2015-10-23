@@ -852,11 +852,13 @@ void main()
 				
 					if(gBatVoltArray[cur_detect_pos-1][0] >= BAT_MIN_VOLT_OPEN)
 					{
-
-						gBatStateBuf[cur_detect_pos] |= (CHARGE_STATE_FAST|BAT_DETECT_BIT);
-
-						gBatNumNow++;	
-						gBatNowBuf[gBatNumNow] = cur_detect_pos;
+						if(gBatVoltArray[cur_detect_pos-1][0] > BAT_MAX_VOLT_OPEN)
+							gBatStateBuf[cur_detect_pos] |= (BAT_TYPE_ERROR|HAS_BATTERY);
+						else
+							gBatStateBuf[cur_detect_pos] |= (CHARGE_STATE_FAST|BAT_DETECT_BIT);
+	
+							gBatNumNow++;	
+							gBatNowBuf[gBatNumNow] = cur_detect_pos;
 					}
 				}
 			}

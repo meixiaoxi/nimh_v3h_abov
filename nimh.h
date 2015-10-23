@@ -47,7 +47,7 @@ typedef 	 unsigned long		u32;
 #warning "3.3v ldo"
 #define BAT_MIN_VOLT_33_OPEN	472		//(0.3/2.6)*4096
 #define BAT_MIN_VOLT_OPEN	372 			//(0.3/3.3)*4096
-#define BAT_MAX_VOLT_OPEN	2110		//(1.7/3.3)*4096
+#define BAT_MAX_VOLT_OPEN	1923		//(1.55/3.3)*4096
 
 #define BAT_MIN_VOLT_OPEN_SPE	372 			//(0.3/3.3)*4096
 
@@ -80,7 +80,7 @@ typedef 	 unsigned long		u32;
 #elif (LDO_LEVEL == 4000)
 #warning "4v ldo"
 #define BAT_MIN_VOLT_OPEN	307 			//(0.3/4)*4096
-#define BAT_MAX_VOLT_OPEN	1740		//(1.7/4)*4096
+#define BAT_MAX_VOLT_OPEN	1587		//(1.55/4)*4096
 
 #define BAT_MIN_VOLT_OPEN_SPE	307 			//(0.3/4)*4096
 

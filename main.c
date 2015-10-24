@@ -3,6 +3,8 @@
 extern u8 gCount,ledOnFlag;
 
 extern u32 ledDispalyTick;
+extern u8 isFirst;
+u32 idata gUpdateDebanceTick[4];
 u8 gIsChargingBatPos=1;   //此刻正在充电电池的标记    
 u8 gPreChargingBatPos = 0;
 u32 shortTick=0;
@@ -27,8 +29,6 @@ u8 gBatNumNow = 0;
 		// 1/2/3/4号电池
 u8 gBatNowBuf[5]={0,0,0,0,0};  //存放充电器上电池的标号
 u8 gBatLeveL[] = {0,0,0,0};
-
-
 u16 preVoltData[4] ={0,0,0,0};
 
 u16 gLowCurrentCount=0;
@@ -42,6 +42,60 @@ u8 fitCount[4] = {0,0,0,0};
 u32 gChargingTimeTick[4] ={0,0,0,0};
 
 
+void updateBatLevel(u16 tempV,u8 batNum)
+{
+	u8 level;
+
+
+	if(gBatLeveL[batNum-1] == 0)
+	{
+		if(tempV > BAT_LEVEL_43_IDLE)
+			gBatLeveL[batNum-1] = 4;
+		else if(tempV > BAT_LEVEL_32_IDLE)
+			gBatLeveL[batNum-1] = 3;
+		else if(tempV > BAT_LEVEL_21_IDLE)
+			gBatLeveL[batNum-1] = 2;
+		else
+			gBatLeveL[batNum-1] = 1;					
+		
+		gUpdateDebanceTick[batNum-1] = getSysTick();
+		if(isFirst == 0)
+		{
+			ledDispalyTick = getSysTick()-LED_DISPLAY_INTERVAL-1;
+		}
+		
+	}
+	else
+	{
+		if(gSysStatus == SYS_CHARGING_STATE)
+		{
+			if(tempV > BAT_LEVEL_34_CHARGING)
+				level = 4;
+			else if(tempV > BAT_LEVEL_23_CHARGING)
+				level = 3;
+			else if(tempV > BAT_LEVEL_12_CHARGING)
+				level =2;
+			else
+				level =1;
+			if(level > gBatLeveL[batNum-1])
+				gBatLeveL[batNum-1] = level;
+		}
+		else
+		{
+			if(tempV > BAT_LEVEL_43_OUTPUT)
+				level = 4;
+			else if(tempV > BAT_LEVEL_32_OUTPUT)
+				level = 3;
+			else if(tempV > BAT_LEVEL_21_OUTPUT)
+				level =2;
+			else
+				level =1;
+			if(level < gBatLeveL[batNum-1])
+				gBatLeveL[batNum-1] = level;
+		}
+		gUpdateDebanceTick[batNum-1] = getSysTick();
+	}
+}
 
 
 void outputHandler()
@@ -73,7 +127,7 @@ do
 			if(gOutputStatus == OUTPUT_STATUS_WAIT)
 			{
 				gBatVoltArray[1][0] = 0xFFFF;
-				gBatVoltArray[2][0] = 1;
+				gCount = 1;
 				for(cur_detect_pos = 1; cur_detect_pos < 4; cur_detect_pos++)
 				{
 					preVoltData[cur_detect_pos] = getVbatAdc(cur_detect_pos+1);
@@ -84,7 +138,7 @@ do
 					gBatVoltArray[0][0] = preVoltData[cur_detect_pos-1] -preVoltData[cur_detect_pos];
 					if(gBatVoltArray[0][0] < gBatVoltArray[1][0])
 					{
-						gBatVoltArray[2][0] = cur_detect_pos;
+						gCount = cur_detect_pos;
 						gBatVoltArray[1][0] = gBatVoltArray[0][0];
 					}
 					if(preVoltData[cur_detect_pos] > preVoltData[cur_detect_pos-1] ||( gBatVoltArray[0][0]<MIN_VBAT_OUTPUT_IDLE))
@@ -94,13 +148,7 @@ do
 				{
 					gOutputStatus = OUTPUT_STATUS_NORMAL;
 					ENABLE_BOOST();
-					if(gBatVoltArray[1][0] > OUTPUT_SHOW_LEVEL_3)
-						gCount = 3;
-					else if(gBatVoltArray[1][0] > OUTPUT_SHOW_LEVEL_2)
-						gCount = 2;
-					else
-						gCount = 1;
-					
+					updateBatLevel(gBatVoltArray[1][0],gCount+1);
 				}
 				else
 				{
@@ -120,7 +168,7 @@ do
 					
 					gBatVoltArray[0][0] = preVoltData[cur_detect_pos-1] -preVoltData[cur_detect_pos];
 					
-					if(cur_detect_pos == gBatVoltArray[2][0])
+					if(cur_detect_pos == gCount)
 						gBatVoltArray[1][0] = gBatVoltArray[0][0];
 					
 					if(preVoltData[cur_detect_pos] > preVoltData[cur_detect_pos-1] ||( gBatVoltArray[0][0] < MIN_VBAT_OUPUT))
@@ -132,6 +180,8 @@ do
 					LED_OFF(1),LED_OFF(2),LED_OFF(3),LED_OFF(4);
 					DISABLE_BOOST();
 				}
+				else if(getDiffTickFromNow(gUpdateDebanceTick[gCount]) > MIN_BAT_LEVEL_UPDATE_INTERVAL)
+					updateBatLevel(gBatVoltArray[1][0],gCount+1);
 			}
 			#if 0
 			if(preVoltData[0] < MIN_VBAT_CHANNEL_1_IDLE)
@@ -178,21 +228,6 @@ void PreCharge(u8 batNum)
 		}
 }
 
-void updateBatLevel(u16 tempV,u8 batNum)
-{
-	u8 level;
-
-	//send(tempV);
-
-	if(tempV < BAT_LEVEL_LOW_TO_MIDD)
-		level = BAT_LEVEL_LOW;
-	else if(tempV < BAT_LEVEL_MIDD_TO_HIGH)
-		level =  BAT_LEVEL_MIDD;
-	else
-		level =  BAT_LEVEL_HIGH;	
-	if(level > gBatLeveL[batNum-1])
-		gBatLeveL[batNum-1] = level;
-}
 
 void FastCharge(u8 batNum)
 {
@@ -203,8 +238,8 @@ void FastCharge(u8 batNum)
 
 	tempT = getBatTemp(batNum);
 
-
-	updateBatLevel(tempV,batNum);
+	if(getDiffTickFromNow(gUpdateDebanceTick[batNum-1]) > MIN_BAT_LEVEL_UPDATE_INTERVAL)
+		updateBatLevel(tempV,batNum);
 
 	if(getDiffTickFromNow(gChargingTimeTick[batNum-1]) > BAT_START_DV_CHECK)  //hod-off time, in this period, we do NOT detect -dv
 	{
@@ -304,6 +339,7 @@ void FastCharge(u8 batNum)
 	else
 	{
 		gBatVoltArray[batNum-1][0] = tempV;
+		
 		
 		if(tempT < ADC_TEMP_MAX )
 		{
@@ -724,6 +760,7 @@ void StatusCheck()
 				ledOnFlag=0;
 				ledDispalyTick = 0;
 				gPreChargingBatPos =0;
+				isFirst = 0;
 				}
 			}
 			else
@@ -733,6 +770,7 @@ void StatusCheck()
 				DISABLE_BOOST();
 				gSysStatus = SYS_CHARGING_STATE;
 				CHANGE_TO_INPUT();
+				removeAllBat();
 			}
 		}	
 }

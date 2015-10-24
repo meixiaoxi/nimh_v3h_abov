@@ -4,7 +4,7 @@
 #include "MC96F8316.h"
 
 typedef  unsigned char		u8;
-typedef	 unsigned int 		u16;		
+typedef	 unsigned short 		u16;		
 typedef 	 unsigned long		u32;
 
 #define		cli()		do{IE &= ~0x80;}while(0)
@@ -66,12 +66,24 @@ typedef 	 unsigned long		u32;
 
 #define DV_ENABLE_MIN_VOLT		1799						//  (1.45/3.3)*4096
 
+#define BAT_LEVEL_12_CHARGING		1712		// 1.38   (1.38/3.3*4096)
+#define BAT_LEVEL_23_CHARGING		1737		// 1.4    (1.4/3.3*4096)
+#define BAT_LEVEL_34_CHARGING		1762		// 1.42   (1.42/3.3*4096)
+
 //output
 #define MIN_VBAT_CHANNEL_1_IDLE	 2916  //(4.7/2=2.4V   2.4/3.3*4096)
 #define MIN_VBAT_OUPUT				620	//(1/2=0.5	0.5/3.3*4096)
 #define MIN_VBAT_OUTPUT_IDLE		620	// (1.3/2 = 0.65  0.65/3.3*4096)
 #define	OUTPUT_SHOW_LEVEL_3		806	//(1.3/2  0.65/3.3*4096 )
 #define	OUTPUT_SHOW_LEVEL_2		775	//(1.25/2 0.625/3.3*4096)	
+
+#define	BAT_LEVEL_43_OUTPUT		1563      // 1.26 (1.26/3.3*4096)
+#define 	BAT_LEVEL_32_OUTPUT		1526      //  1.23 (1.23/3.3*4096)
+#define   BAT_LEVEL_21_OUTPUT		1501	//  1.21 (1.21/3.3*4096)
+
+#define	BAT_LEVEL_43_IDLE		1613      // 1.3 (1.3/3.3*4096)
+#define 	BAT_LEVEL_32_IDLE		1576      //  1.27 (1.27/3.3*4096)
+#define   BAT_LEVEL_21_IDLE		1551	//  1.25 (1.25/3.3*4096)
 
 //temperature adc
 #define 	ADC_TEMP_MAX	1069    //55
@@ -99,6 +111,10 @@ typedef 	 unsigned long		u32;
 
 #define DV_ENABLE_MIN_VOLT		1484						//  (1.45/4)*4096
 
+#define BAT_LEVEL_12_CHARGING		1413		// 1.38   (1.38/4*4096)
+#define BAT_LEVEL_23_CHARGING		1433		// 1.4    (1.4/4*4096)
+#define BAT_LEVEL_34_CHARGING		1454		// 1.42   (1.42/4*4096)
+
 //output
 #define MIN_VBAT_CHANNEL_1_IDLE	 2457  //(4.7/2=2.4V   2.4/4*4096)
 #define MIN_VBAT_OUPUT				512	//(1/2=0.5	0.5/4*4096)
@@ -106,6 +122,13 @@ typedef 	 unsigned long		u32;
 #define	OUTPUT_SHOW_LEVEL_3		665	//(1.3/2  0.65/4*4096 )
 #define	OUTPUT_SHOW_LEVEL_2		640	//(1.25/2 0.625/4*4096)
 
+#define	BAT_LEVEL_43_OUTPUT		1290      // 1.26 (1.26/4*4096)
+#define 	BAT_LEVEL_32_OUTPUT		1259      //  1.23 (1.23/4*4096)
+#define   BAT_LEVEL_21_OUTPUT		1239	//  1.21 (1.21/4*4096)
+
+#define	BAT_LEVEL_43_IDLE		1331      // 1.3 (1.3/4*4096)
+#define 	BAT_LEVEL_32_IDLE		1300      //  1.27 (1.27/4*4096)
+#define   BAT_LEVEL_21_IDLE		1280	//  1.25 (1.25/4*4096)
 
 //temperature adc
 #define 	ADC_TEMP_MAX	1069    //55
@@ -136,8 +159,7 @@ typedef 	 unsigned long		u32;
 #define BAT_LEVEL_HIGH	3
 
 
-
-
+#define MIN_BAT_LEVEL_UPDATE_INTERVAL	7324 //120000	2000/16.384
 #define BAT_CHARGING_PULSE_TIME	30   //2000ms  2000/16.384
 #define BAT_CHARGING_PULSE_DELAY_TIME	33//1100ms
 #define BAT_CHARGING_DETECT_TIME	122
@@ -208,4 +230,6 @@ void LED_OFF(u8 led);
 void LED_ON(u8 led);
 
 void delay_ms(u16 nus);
+
+
 #endif

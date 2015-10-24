@@ -36,10 +36,10 @@ void LED_OFF(u8 led)
 }
 
 
-u8 gCount= 0,ledOnFlag=0;
+u8 gCount= 0,ledOnFlag=0,isFirst = 0;
 
 u32 ledDispalyTick = 0;
-
+u8 gBatTempLevel[4];
 void ledHandler(void)
 {
 	u8 i;
@@ -67,6 +67,17 @@ if(gSysStatus == SYS_CHARGING_STATE)
 {
 	if(getDiffTickFromNow(ledDispalyTick) > LED_DISPLAY_INTERVAL)
 	{
+		if(isFirst == 0)
+		{
+			for(i=0;i<4;i++)
+			{
+				gBatTempLevel[i]= gBatLeveL[i];
+				isFirst += gBatLeveL[i];
+			}
+			if(isFirst == 0)
+				return;
+			isFirst = 1;
+		}
 		if(getSysTick() & 0x10)
 		{
 			ledOnFlag = 1;
@@ -74,7 +85,7 @@ if(gSysStatus == SYS_CHARGING_STATE)
 			{
 				for(i=1;i<5;i++)
 				{
-					if(gBatLeveL[i-1] >=gCount && (gBatStateBuf[i]&(CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) ==0)
+					if(gBatTempLevel[i-1] >=gCount && (gBatStateBuf[i]&(CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) ==0)
 						LED_ON(i);
 				}
 			}
@@ -96,6 +107,7 @@ if(gSysStatus == SYS_CHARGING_STATE)
 			if(gCount >4)
 			{
 				gCount =0;
+				isFirst = 0;
 				ledDispalyTick = getSysTick();
 			}
 		}
@@ -124,19 +136,10 @@ if(gSysStatus == SYS_CHARGING_STATE)
 else
 {	
 	if(gOutputStatus == OUTPUT_STATUS_NORMAL)
-	{
-		if(gBatVoltArray[1][0] > OUTPUT_SHOW_LEVEL_3)
-			gBatVoltArray[3][0] = 3;
-		else if(gBatVoltArray[1][0] > OUTPUT_SHOW_LEVEL_2)
-			gBatVoltArray[3][0] = 2;
-		else
-			gBatVoltArray[3][0] = 1;
-		if(gBatVoltArray[3][0] < gCount)
-			gCount = gBatVoltArray[3][0];
-		
+	{		
 		if(getSysTick() & SHOW_CHARGING_TICK)
 		{
-			for(i=1;i<=gCount;i++)
+			for(i=1;i<=gBatLeveL[gCount];i++)
 			{	
 				LED_ON(i);
 			}

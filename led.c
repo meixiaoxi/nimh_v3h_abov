@@ -65,6 +65,8 @@ void ledHandler(void)
 	*/
 if(gSysStatus == SYS_CHARGING_STATE)
 {
+	do
+	{
 	if(getDiffTickFromNow(ledDispalyTick) > LED_DISPLAY_INTERVAL)
 	{
 		if(isFirst == 0)
@@ -75,7 +77,7 @@ if(gSysStatus == SYS_CHARGING_STATE)
 				isFirst += gBatLeveL[i];
 			}
 			if(isFirst == 0)
-				return;
+				break;
 			isFirst = 1;
 		}
 		if(getSysTick() & 0x10)
@@ -113,6 +115,7 @@ if(gSysStatus == SYS_CHARGING_STATE)
 		}
 		
 	}
+	}while(0);
 
 	//error state
 

@@ -31,6 +31,8 @@ u8 gBatNowBuf[5]={0,0,0,0,0};  //存放充电器上电池的标号
 u8 gBatLeveL[] = {0,0,0,0};
 u16 preVoltData[4] ={0,0,0,0};
 
+u8 gAdcCount[4] = {0,0,0,0};
+
 u16 gLowCurrentCount=0;
 
 u8 skipCount;
@@ -246,15 +248,32 @@ void FastCharge(u8 batNum)
 		//gBatVoltTemp[batNum-1][testData[batNum-1]] = tempV;
 		//testData[batNum-1]++;
 
-		if(preVoltData[batNum-1])
+		if(gAdcCount[batNum-1] > 23)
 		{
-			tempV = ((preVoltData[batNum-1]<<2) + tempV)/5;
-			preVoltData[batNum-1] = tempV;
+			gAdcCount[batNum-1]  = 0;
+			tempV = getVbatAdc(batNum);
+			if(preVoltData[batNum-1])
+			{
+				tempV = ((preVoltData[batNum-1]<<2) + tempV)/5;
+				preVoltData[batNum-1] = tempV;
+			}
+			else
+			{
+				preVoltData[batNum-1] = tempV;
+			}
 		}
 		else
 		{
-			preVoltData[batNum-1] = tempV;
+			gAdcCount[batNum-1]++;
+			if(preVoltData[batNum-1] != 0)
+				tempV = preVoltData[batNum-1];
+			else
+			{
+				tempV = getVbatAdc(batNum);
+				preVoltData[batNum-1] = tempV;
+			}
 		}
+		
 		/*
 		tempV = ((gBatVoltArray[batNum-1][0]<<2)+tempV)/5;
 		send(tempV);
@@ -433,6 +452,7 @@ void removeBat(u8 toChangeBatPos)
 	u8 i;
 
 	ChargingTimeTick = 0;
+	gAdcCount[gBatNowBuf[toChangeBatPos] -1] = 0;
 	gBatLeveL[gBatNowBuf[toChangeBatPos] -1] = 0;
 	gChargeSkipCount[gBatNowBuf[toChangeBatPos] -1 ] = 0;
 	gChargingTimeTick[gBatNowBuf[toChangeBatPos] - 1] = 0;
@@ -472,6 +492,7 @@ void removeAllBat()
 		gBatNowBuf[i]=0;
 		dropCount[i]=0;
 		fitCount[i] = 0;
+		gAdcCount[i] = 0;
 	}
 	gBatNowBuf[4]=0;
 	gBatStateBuf[4] =0;

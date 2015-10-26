@@ -70,6 +70,8 @@ typedef 	 unsigned long		u32;
 #define BAT_LEVEL_23_CHARGING		1712		// 1.38    (1.38/3.3*4096)
 #define BAT_LEVEL_34_CHARGING		1737		// 1.4   (1.4/3.3*4096)
 
+#define BAT_INITIAL_VOLT_FULL		1824		// 1.47 (1.47/3.3*4096)
+
 //output
 #define MIN_VBAT_CHANNEL_1_IDLE	 2916  //(4.7/2=2.4V   2.4/3.3*4096)
 #define MIN_VBAT_OUPUT				620	//(1/2=0.5	0.5/3.3*4096)
@@ -114,6 +116,8 @@ typedef 	 unsigned long		u32;
 #define BAT_LEVEL_12_CHARGING		1392		// 1.36   (1.36/4*4096)
 #define BAT_LEVEL_23_CHARGING		1413		// 1.38    (1.38/4*4096)
 #define BAT_LEVEL_34_CHARGING		1433		// 1.4   (1.4/4*4096)
+
+#define BAT_INITIAL_VOLT_FULL		1505		// 1.47 (1.47/4*4096)
 
 //output
 #define MIN_VBAT_CHANNEL_1_IDLE	 2457  //(4.7/2=2.4V   2.4/4*4096)
@@ -172,6 +176,7 @@ typedef 	 unsigned long		u32;
 #define BAT_CHARGING_FAST_MAX_TIME	 1538085             //  7hour  (5*60*60*1000)/16.384
 #define BAT_START_DV_CHECK			18310			   // 5min  (5*60*1000)/16.384
 
+#define BAT_INITIAL_FULL_CHECK_TIME	10986			// 3min  (3*60*1000)/16.384
 #define BAT_DV_CHECK_INTERVAL			305			//5s  5*1000/16.384
 #define ADC_DV_VOLT						6			//5mv   0.005/3.3*4096
 

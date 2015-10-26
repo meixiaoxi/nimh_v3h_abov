@@ -339,7 +339,14 @@ void FastCharge(u8 batNum)
 	else
 	{
 		gBatVoltArray[batNum-1][0] = tempV;
-		
+
+		if(tempV > BAT_INITIAL_VOLT_FULL && getDiffTickFromNow(gChargingTimeTick[batNum-1]) > BAT_INITIAL_FULL_CHECK_TIME)
+		{
+			gBatStateBuf[batNum] &= ~CHARGE_STATE_FAST;
+			gBatStateBuf[batNum] |= CHARGE_STATE_TRICK;
+			gBatStateBuf[batNum] |= CHARGE_STATE_FULL;
+			gChargingTimeTick[batNum-1] = 0;
+		}
 		
 		if(tempT < ADC_TEMP_MAX )
 		{
@@ -624,8 +631,6 @@ void chargeHandler(void)
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_PRE;
 						else if(tempV< CHARGING_FAST_END_VOLT)
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_FAST;
-						else
-							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= (CHARGE_STATE_TRICK | CHARGE_STATE_FULL);
 
 						if(tempT < ADC_TEMP_MAX || tempT > ADC_TEMP_MIN)
 						{

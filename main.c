@@ -629,7 +629,7 @@ void chargeHandler(void)
 						*/
 						if(tempV< CHARGING_PRE_END_VOLT)
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_PRE;
-						else if(tempV< CHARGING_FAST_END_VOLT)
+						else
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_FAST;
 
 						if(tempT < ADC_TEMP_MAX || tempT > ADC_TEMP_MIN)

@@ -652,33 +652,9 @@ void chargeHandler(void)
 			//	if((gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & 0x38) == CHARGE_STATE_FAST)
 			//		FastCharge(gBatNowBuf[gIsChargingBatPos]);
 			//ENABLE_ADC_DELAY_DETECT
-		if(getDiffTickFromNow(ChargingTimeTick) > BAT_CHARGING_PULSE_DELAY_TIME)
-		 {
-			if(gBatStateBuf[gBatNowBuf[gPreChargingBatPos]] & ((BAT_TYPE_ERROR) |(CHARGE_STATE_ERROR)))
-			{
-				
-			}
-			else if(gPreChargingBatPos !=0)
-			{
-				//delay_ms(100);
-				//if(getDiffTickFromNow(ChargingTimeTick) > BAT_CHARGING_PULSE_DELAY_TIME)
-				{
-					switch(gBatStateBuf[gBatNowBuf[gPreChargingBatPos]] & 0x38)
-					{
-						case CHARGE_STATE_FAST:
-								FastCharge(gBatNowBuf[gPreChargingBatPos]);break;
-					//	case CHARGE_STATE_SUP:
-					//			 SupCharge(gBatNowBuf[gIsChargingBatPos]);break;
-						case CHARGE_STATE_PRE:
-								PreCharge(gBatNowBuf[gPreChargingBatPos]);break;
-						case CHARGE_STATE_TRICK:
-								TrickCharge(gBatNowBuf[gPreChargingBatPos]);break;
-						default:
-								break;
-					}
-				}
-			}
 
+			if((gBatStateBuf[gBatNowBuf[gPreChargingBatPos]] & ((BAT_TYPE_ERROR) |(CHARGE_STATE_ERROR))) || gPreChargingBatPos ==0)
+			{
 				ChargingTimeTick = 0;
 				gPreChargingBatPos = gIsChargingBatPos;
 				if(gIsChargingBatPos >= gBatNumNow)
@@ -691,9 +667,42 @@ void chargeHandler(void)
 						gIsChargingBatPos =1;
 				}
 				else
-					gIsChargingBatPos++;
+					gIsChargingBatPos++;				
+			}
+			else //if(gPreChargingBatPos !=0)
+			{
+				if(getDiffTickFromNow(ChargingTimeTick) > BAT_CHARGING_PULSE_DELAY_TIME)
+		 		{
+					switch(gBatStateBuf[gBatNowBuf[gPreChargingBatPos]] & 0x38)
+					{
+						case CHARGE_STATE_FAST:
+								FastCharge(gBatNowBuf[gPreChargingBatPos]);break;
+					//	case CHARGE_STATE_SUP:
+					//			 SupCharge(gBatNowBuf[gIsChargingBatPos]);break;
+						case CHARGE_STATE_PRE:
+								PreCharge(gBatNowBuf[gPreChargingBatPos]);break;
+						case CHARGE_STATE_TRICK:
+								TrickCharge(gBatNowBuf[gPreChargingBatPos]);break;
+						default:
+							break;
+					}
 
-		  }
+					ChargingTimeTick = 0;
+					gPreChargingBatPos = gIsChargingBatPos;
+					if(gIsChargingBatPos >= gBatNumNow)
+					{
+						if(gBatNumNow%2)
+						{
+							gIsChargingBatPos =0;
+						}
+						else
+							gIsChargingBatPos =1;
+					}
+					else
+						gIsChargingBatPos++;					
+					
+				}
+			}		  
 		}
 		else if(/*gIsChargingBatPos !=0 && */(getDiffTickFromNow(ChargingTimeTick) > BAT_CHARGING_TEST_TIME))
 		{

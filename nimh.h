@@ -66,9 +66,9 @@ typedef 	 unsigned long		u32;
 
 #define DV_ENABLE_MIN_VOLT		1799						//  (1.45/3.3)*4096
 
-#define BAT_LEVEL_12_CHARGING		1688		// 1.36   (1.36/3.3*4096)
-#define BAT_LEVEL_23_CHARGING		1712		// 1.38    (1.38/3.3*4096)
-#define BAT_LEVEL_34_CHARGING		1737		// 1.4   (1.4/3.3*4096)
+#define BAT_LEVEL_12_CHARGING		1700		// 1.37   (1.37/3.3*4096)
+#define BAT_LEVEL_23_CHARGING		1725		// 1.39    (1.39/3.3*4096)
+#define BAT_LEVEL_34_CHARGING		1747		// 1.408   (1.408/3.3*4096)
 
 #define BAT_INITIAL_VOLT_FULL		1824		// 1.47 (1.47/3.3*4096)
 
@@ -113,9 +113,9 @@ typedef 	 unsigned long		u32;
 
 #define DV_ENABLE_MIN_VOLT		1484						//  (1.45/4)*4096
 
-#define BAT_LEVEL_12_CHARGING		1392		// 1.36   (1.36/4*4096)
-#define BAT_LEVEL_23_CHARGING		1413		// 1.38    (1.38/4*4096)
-#define BAT_LEVEL_34_CHARGING		1433		// 1.4   (1.4/4*4096)
+#define BAT_LEVEL_12_CHARGING		1402		// 1.37   (1.37/4*4096)
+#define BAT_LEVEL_23_CHARGING		1423		// 1.39    (1.39/4*4096)
+#define BAT_LEVEL_34_CHARGING		1441		// 1.408   (1.408/4*4096)
 
 #define BAT_INITIAL_VOLT_FULL		1505		// 1.47 (1.47/4*4096)
 

@@ -657,7 +657,18 @@ void chargeHandler(void)
 						{
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_ERROR;
 						}
-						
+
+						if(gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] == 0)
+						{
+							gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] = getSysTick();
+							if(gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] == 0)
+							{
+								EA =0;
+								shortTick=1;
+								EA= 1;
+								gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] = 1;
+							}
+						}
 						updateBatLevel(tempV,gBatNowBuf[gIsChargingBatPos]);
 					}
 						
@@ -754,20 +765,6 @@ void chargeHandler(void)
 			{
 					ChargingTimeTick = 0;
 					removeBat(gIsChargingBatPos);
-			}
-			else
-			{
-				if(gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] == 0)
-				{
-					gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] = getSysTick();
-					if(gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] == 0)
-					{
-						EA =0;
-						shortTick=1;
-						EA= 1;
-						gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] = 1;
-					}
-				}
 			}
 			}
 			//ENABLE_ADC_DELAY_DETECT

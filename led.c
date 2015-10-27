@@ -87,8 +87,11 @@ if(gSysStatus == SYS_CHARGING_STATE)
 			{
 				for(i=1;i<5;i++)
 				{
-					if(gBatTempLevel[i-1] >=gCount && (gBatStateBuf[i]&(CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) ==0)
-						LED_ON(i);
+					if(gBatLeveL[i - 1])
+					{
+						if(gBatTempLevel[i-1] >=gCount && (gBatStateBuf[i]&(CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) ==0)
+							LED_ON(i);
+					}
 				}
 			}
 		}

@@ -64,7 +64,10 @@ typedef 	 unsigned long		u32;
 
 #define CHARGING_FAST_TEMP_END_VOLT	1799			// (1.45/3.3)*4096
 
-#define DV_ENABLE_MIN_VOLT		1799						//  (1.45/3.3)*4096
+#define DV_ENABLE_MIN_VOLT		1774						//  (1.43/3.3)*4096
+#define BAT_VOLT_CHANGE_FASTER	1750						//  (1.41/3.3)*4096
+
+
 
 #define BAT_LEVEL_12_CHARGING		1700		// 1.37   (1.37/3.3*4096)
 #define BAT_LEVEL_23_CHARGING		1725		// 1.39    (1.39/3.3*4096)
@@ -88,7 +91,7 @@ typedef 	 unsigned long		u32;
 #define   BAT_LEVEL_21_IDLE		1551	//  1.25 (1.25/3.3*4096)
 
 //temperature adc
-#define 	ADC_TEMP_MAX	1069    //55
+#define 	ADC_TEMP_MAX	1260    //48
 #define	ADC_TEMP_MIN	3007	//0
 
 #elif (LDO_LEVEL == 4000)
@@ -111,7 +114,9 @@ typedef 	 unsigned long		u32;
 
 #define CHARGING_FAST_TEMP_END_VOLT	1484			// (1.45/4)*4096
 
-#define DV_ENABLE_MIN_VOLT		1484						//  (1.45/4)*4096
+#define DV_ENABLE_MIN_VOLT		1464						//  (1.43/4)*4096
+#define BAT_VOLT_CHANGE_FASTER	1443						//  (1.41/4)*4096
+
 
 #define BAT_LEVEL_12_CHARGING		1402		// 1.37   (1.37/4*4096)
 #define BAT_LEVEL_23_CHARGING		1423		// 1.39    (1.39/4*4096)
@@ -135,7 +140,7 @@ typedef 	 unsigned long		u32;
 #define   BAT_LEVEL_21_IDLE		1280	//  1.25 (1.25/4*4096)
 
 //temperature adc
-#define 	ADC_TEMP_MAX	1069    //55
+#define 	ADC_TEMP_MAX	1260    //48
 #define	ADC_TEMP_MIN	3007	//0
 #endif
 

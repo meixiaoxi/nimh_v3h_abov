@@ -82,9 +82,9 @@ typedef 	 unsigned long		u32;
 #define	OUTPUT_SHOW_LEVEL_3		806	//(1.3/2  0.65/3.3*4096 )
 #define	OUTPUT_SHOW_LEVEL_2		775	//(1.25/2 0.625/3.3*4096)	
 
-#define	BAT_LEVEL_43_OUTPUT		1563      // 1.26 (1.26/3.3*4096)
-#define 	BAT_LEVEL_32_OUTPUT		1526      //  1.23 (1.23/3.3*4096)
-#define   BAT_LEVEL_21_OUTPUT		1501	//  1.21 (1.21/3.3*4096)
+#define	BAT_LEVEL_43_OUTPUT		781      // 1.26/2 (1.26/3.3/2*4096)
+#define 	BAT_LEVEL_32_OUTPUT		763      //  1.23/2 (1.23/3.3/2*4096)
+#define   BAT_LEVEL_21_OUTPUT		751	//  1.21/2 (1.21/3.3/2*4096)
 
 #define	BAT_LEVEL_43_IDLE		1613      // 1.3 (1.3/3.3*4096)
 #define 	BAT_LEVEL_32_IDLE		1576      //  1.27 (1.27/3.3*4096)
@@ -131,9 +131,9 @@ typedef 	 unsigned long		u32;
 #define	OUTPUT_SHOW_LEVEL_3		665	//(1.3/2  0.65/4*4096 )
 #define	OUTPUT_SHOW_LEVEL_2		640	//(1.25/2 0.625/4*4096)
 
-#define	BAT_LEVEL_43_OUTPUT		1290      // 1.26 (1.26/4*4096)
-#define 	BAT_LEVEL_32_OUTPUT		1259      //  1.23 (1.23/4*4096)
-#define   BAT_LEVEL_21_OUTPUT		1239	//  1.21 (1.21/4*4096)
+#define	BAT_LEVEL_43_OUTPUT		645      // 1.26/2 (1.26/4/2*4096)
+#define 	BAT_LEVEL_32_OUTPUT		630      //  1.23 (1.23/4/2*4096)
+#define   BAT_LEVEL_21_OUTPUT		620	//  1.21 (1.21/4/2*4096)
 
 #define	BAT_LEVEL_43_IDLE		1331      // 1.3 (1.3/4*4096)
 #define 	BAT_LEVEL_32_IDLE		1300      //  1.27 (1.27/4*4096)

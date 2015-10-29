@@ -51,6 +51,7 @@ void updateBatLevel(u16 tempV,u8 batNum)
 
 	if(gBatLeveL[batNum-1] == 0)
 	{
+		/*
 		if(tempV > BAT_LEVEL_43_IDLE)
 			gBatLeveL[batNum-1] = 4;
 		else if(tempV > BAT_LEVEL_32_IDLE)
@@ -61,42 +62,55 @@ void updateBatLevel(u16 tempV,u8 batNum)
 			gBatLeveL[batNum-1] = 1;					
 		
 		gUpdateDebanceTick[batNum-1] = getSysTick();
+		*/
 		if(isFirst == 0)
 		{
 			ledDispalyTick = getSysTick()-LED_DISPLAY_INTERVAL-1;
 		}
 		
 	}
-	else
+
+	if(gSysStatus == SYS_CHARGING_STATE)
 	{
-		if(gSysStatus == SYS_CHARGING_STATE)
+		if(tempV > BAT_LEVEL_34_CHARGING)
+			level = 4;
+		else if(tempV > BAT_LEVEL_23_CHARGING)
+			level = 3;
+		else if(tempV > BAT_LEVEL_12_CHARGING)
+			level =2;
+		else
+			level =1;
+		if(gBatLeveL[batNum-1])
 		{
-			if(tempV > BAT_LEVEL_34_CHARGING)
-				level = 4;
-			else if(tempV > BAT_LEVEL_23_CHARGING)
-				level = 3;
-			else if(tempV > BAT_LEVEL_12_CHARGING)
-				level =2;
-			else
-				level =1;
 			if(level > gBatLeveL[batNum-1])
 				gBatLeveL[batNum-1] = level;
 		}
 		else
 		{
-			if(tempV > BAT_LEVEL_43_OUTPUT)
-				level = 4;
-			else if(tempV > BAT_LEVEL_32_OUTPUT)
-				level = 3;
-			else if(tempV > BAT_LEVEL_21_OUTPUT)
-				level =2;
-			else
-				level =1;
+			gBatLeveL[batNum-1] = level;
+		}
+	}
+	else
+	{
+		if(tempV > BAT_LEVEL_43_OUTPUT)
+			level = 4;
+		else if(tempV > BAT_LEVEL_32_OUTPUT)
+			level = 3;
+		else if(tempV > BAT_LEVEL_21_OUTPUT)
+			level =2;
+		else
+			level =1;
+
+		if(gBatLeveL[batNum-1])
+		{
 			if(level < gBatLeveL[batNum-1])
 				gBatLeveL[batNum-1] = level;
 		}
-		gUpdateDebanceTick[batNum-1] = getSysTick();
+		else
+			gBatLeveL[batNum-1] = level;
 	}
+	
+	gUpdateDebanceTick[batNum-1] = getSysTick();
 }
 
 
@@ -839,7 +853,7 @@ void main()
 
 	delay_ms(16);
 
-	LVRCR  = 0x0A;                      // builtin reset 2.44V set, LVRCR.0=0 enable !!!
+	LVRCR  = 0x12;                      // builtin reset 3.14V set, LVRCR.0=0 enable !!!
 
 	InitConfig();
 

@@ -203,7 +203,10 @@ do
 void PreCharge(u8 batNum)
 {
 	u16 tempT;
-		if(getDiffTickFromNow(gChargingTimeTick[batNum-1]) > BAT_CHARGING_PRE_MAX_TIME)
+
+		gChargingTimeTick[batNum-1]++;
+		
+		if(gChargingTimeTick[batNum-1] > BAT_CHARGING_PRE_MAX_COUNT)
 		{
 			gBatStateBuf[batNum] &= ~CHARGE_STATE_PRE;
 			gBatStateBuf[batNum] |=BAT_TYPE_ERROR;
@@ -235,17 +238,16 @@ void FastCharge(u8 batNum)
 {
 	u16 tempV,tempT,tempAvg;
 
-
+	gChargingTimeTick[batNum-1]++;
 	tempT = getBatTemp(batNum);
 
 	if(getDiffTickFromNow(gUpdateDebanceTick[batNum-1]) > MIN_BAT_LEVEL_UPDATE_INTERVAL)
 		updateBatLevel(tempV,batNum);
 
-	if(getDiffTickFromNow(gChargingTimeTick[batNum-1]) > BAT_START_DV_CHECK)  //hod-off time, in this period, we do NOT detect -dv
+	if(gChargingTimeTick[batNum-1] > BAT_START_DV_COUNT)  //hod-off time, in this period, we do NOT detect -dv
 	{
 		//gBatVoltTemp[batNum-1][testData[batNum-1]] = tempV;
 		//testData[batNum-1]++;
-
 		if(gAdcCount[batNum-1] > 23 || preVoltData[batNum-1] > BAT_VOLT_CHANGE_FASTER)
 		{
 			gAdcCount[batNum-1]  = 0;
@@ -290,7 +292,7 @@ void FastCharge(u8 batNum)
 			}
 			*/
 			
-			if(tempV >= CHARGING_FAST_MAX_VOLT || getDiffTickFromNow(gChargingTimeTick[batNum-1]) > BAT_CHARGING_FAST_MAX_TIME || tempT < ADC_TEMP_MAX || tempT > ADC_TEMP_MIN)
+			if(tempV >= CHARGING_FAST_MAX_VOLT || gChargingTimeTick[batNum-1] > BAT_CHARGING_FAST_MAX_COUNT || tempT < ADC_TEMP_MAX || tempT > ADC_TEMP_MIN)
 			{
 				if((tempT < ADC_TEMP_MAX  && tempV <CHARGING_FAST_TEMP_END_VOLT) || tempT > ADC_TEMP_MIN)   //¹ýÎÂ
 				{
@@ -357,7 +359,7 @@ void FastCharge(u8 batNum)
 		tempV = getVbatAdc(batNum);
 		gBatVoltArray[batNum-1][0] = tempV;
 
-		if(tempV > BAT_INITIAL_VOLT_FULL && getDiffTickFromNow(gChargingTimeTick[batNum-1]) > BAT_INITIAL_FULL_CHECK_TIME)
+		if(tempV > BAT_INITIAL_VOLT_FULL && gChargingTimeTick[batNum-1] > BAT_INITIAL_FULL_CHECK_COUNT)
 		{
 			gBatStateBuf[batNum] &= ~CHARGE_STATE_FAST;
 			gBatStateBuf[batNum] |= CHARGE_STATE_TRICK;
@@ -368,7 +370,6 @@ void FastCharge(u8 batNum)
 		if(tempT < ADC_TEMP_MAX || tempT > ADC_TEMP_MIN )
 		{
 			gBatStateBuf[batNum] |= CHARGE_STATE_ERROR;
-			gChargingTimeTick[batNum-1] = 0;
 		}
 	}
 
@@ -394,7 +395,7 @@ void TrickCharge(u8 batNum)
 		{
 			gBatStateBuf[batNum] &= ~CHARGE_STATE_TRICK;
 			gBatStateBuf[batNum] |= CHARGE_STATE_FAST;
-			gChargingTimeTick[batNum-1] = 0;
+			//gChargingTimeTick[batNum-1] = 0;
 		}
 	}
 }
@@ -656,17 +657,8 @@ void chargeHandler(void)
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_ERROR;
 						}
 
-						if(gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] == 0)
-						{
-							gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] = getSysTick();
-							if(gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] == 0)
-							{
-								EA =0;
-								shortTick=1;
-								EA= 1;
-								gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] = 1;
-							}
-						}
+						gChargingTimeTick[gBatNowBuf[gIsChargingBatPos]-1] = 0;
+
 						updateBatLevel(tempV,gBatNowBuf[gIsChargingBatPos]);
 					}
 						

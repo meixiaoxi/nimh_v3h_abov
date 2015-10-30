@@ -14,6 +14,8 @@ u16 gChargeCurrent;
 u8 gSysStatus;
 u8 gOutputStatus;
 
+u8  isFromOutput = 0;
+
 //type_error charge_error  pre  fast sup  trick  charging(on_off)  is_detect(µç³Ø¼ì²â) bat_state(valid)
 //the first byte is a dummy						
 u8 gBatStateBuf[5] = {0x0,0x00,0x00,0x00,0x00};
@@ -530,6 +532,16 @@ void chargeHandler(void)
 	//close all pwm
 	//PB &= 0xF0;
 
+	if(isFromOutput == 1)
+	{
+		if(getDiffTickFromNow(ChargingTimeTick) > BAT_CHARGING_DELAY_FROM_OUTPUT)
+		{
+			isFromOutput = 0;
+			ChargingTimeTick = 0;
+		}
+		else
+			return;
+	}
 	if(gBatNumNow ==0)
 		return;
 
@@ -797,16 +809,18 @@ void StatusCheck()
 				ledDispalyTick = 0;
 				gPreChargingBatPos =0;
 				isFirst = 0;
+				isFromOutput = 0;
 				}
 			}
 			else
 			{
 				gCount = 0;
-				ChargingTimeTick = 0;
 				DISABLE_BOOST();
 				gSysStatus = SYS_CHARGING_STATE;
 				CHANGE_TO_INPUT();
+				isFromOutput = 1;
 				removeAllBat();
+				ChargingTimeTick = getSysTick();
 			}
 		}	
 }
@@ -879,6 +893,7 @@ void main()
 
 	IE |= (1<<7);    //global interrupt
 
+	isFromOutput = 0;
 
 	gSysStatus =  GET_SYS_STATUS();
 	if(gSysStatus == SYS_DISCHARGE_STATE)

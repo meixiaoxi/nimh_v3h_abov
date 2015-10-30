@@ -19,6 +19,7 @@ u16 getAdcValue(u8 channel)
 	while((ADCCRL&0x10) != 0x10)
 	{
 		temp--;
+		ClrWdt();
 		if(temp == 0)
 			break;
 	}

@@ -18,6 +18,7 @@ void delay_us(u16 nus)
 {
 	u16 i;
 	for(i=0;i<nus;i++);
+	ClrWdt();
 }
 u32 getSysTick()
 {

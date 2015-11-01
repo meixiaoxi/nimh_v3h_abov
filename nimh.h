@@ -80,15 +80,15 @@ typedef 	 unsigned long		u32;
 #define BAT_INITIAL_VOLT_FULL		1799		// 1.45(1.45/3.3*4096)
 
 //output
-#define MIN_VBAT_CHANNEL_1_IDLE	 2916  //(4.7/2=2.4V   2.4/3.3*4096)
-#define MIN_VBAT_OUPUT				620	//(1/2=0.5	0.5/3.3*4096)
-#define MIN_VBAT_OUTPUT_IDLE		620	// (1.3/2 = 0.65  0.65/3.3*4096)
-#define	OUTPUT_SHOW_LEVEL_3		806	//(1.3/2  0.65/3.3*4096 )
-#define	OUTPUT_SHOW_LEVEL_2		775	//(1.25/2 0.625/3.3*4096)	
+#define MIN_VBAT_CHANNEL_1_IDLE	 1944  //(4.7/3=2.4V   2.4/3.3*4096)
+#define MIN_VBAT_OUPUT				413	//(1/3=0.5	0.5/3.3*4096)
+#define MIN_VBAT_OUTPUT_IDLE		488	// (1.18/3 = 0.41  0.65/3.3*4096)
+#define	OUTPUT_SHOW_LEVEL_3		537	//(1.3/3  0.65/3.3*4096 )
+#define	OUTPUT_SHOW_LEVEL_2		517	//(1.25/3 0.625/3.3*4096)	
 
-#define	BAT_LEVEL_43_OUTPUT		781      // 1.26/2 (1.26/3.3/2*4096)
-#define 	BAT_LEVEL_32_OUTPUT		763      //  1.23/2 (1.23/3.3/2*4096)
-#define   BAT_LEVEL_21_OUTPUT		751	//  1.21/2 (1.21/3.3/2*4096)
+#define	BAT_LEVEL_43_OUTPUT		521      // 1.26/3 (1.26/3.3/2*4096)
+#define 	BAT_LEVEL_32_OUTPUT		508      //  1.23/3 (1.23/3.3/2*4096)
+#define   BAT_LEVEL_21_OUTPUT		500	//  1.21/3(1.21/3.3/2*4096)
 
 #define	BAT_LEVEL_43_IDLE		1613      // 1.3 (1.3/3.3*4096)
 #define 	BAT_LEVEL_32_IDLE		1576      //  1.27 (1.27/3.3*4096)
@@ -132,15 +132,15 @@ typedef 	 unsigned long		u32;
 #define BAT_INITIAL_VOLT_FULL		1484		// 1.45 (1.45/4*4096)
 
 //output
-#define MIN_VBAT_CHANNEL_1_IDLE	 2457  //(4.7/2=2.4V   2.4/4*4096)
-#define MIN_VBAT_OUPUT				512	//(1/2=0.5	0.5/4*4096)
-#define MIN_VBAT_OUTPUT_IDLE		665	// (1.3/2 = 0.65  0.65/4*4096)
-#define	OUTPUT_SHOW_LEVEL_3		665	//(1.3/2  0.65/4*4096 )
-#define	OUTPUT_SHOW_LEVEL_2		640	//(1.25/2 0.625/4*4096)
+#define MIN_VBAT_CHANNEL_1_IDLE	 1604  //(4.7/3=2.4V   2.4/4*4096)
+#define MIN_VBAT_OUPUT				341	//(1/3=0.5	0.5/4*4096)
+#define MIN_VBAT_OUTPUT_IDLE		402	// (1.18/3 = 0.41  0.65/4*4096)
+#define	OUTPUT_SHOW_LEVEL_3		443	//(1.3/3  0.65/4*4096 )
+#define	OUTPUT_SHOW_LEVEL_2		426	//(1.25/3 0.625/4*4096)	
 
-#define	BAT_LEVEL_43_OUTPUT		645      // 1.26/2 (1.26/4/2*4096)
-#define 	BAT_LEVEL_32_OUTPUT		630      //  1.23 (1.23/4/2*4096)
-#define   BAT_LEVEL_21_OUTPUT		620	//  1.21 (1.21/4/2*4096)
+#define	BAT_LEVEL_43_OUTPUT		430      // 1.26/3 (1.26/3.3/2*4096)
+#define 	BAT_LEVEL_32_OUTPUT		419      //  1.23/3 (1.23/3.3/2*4096)
+#define   BAT_LEVEL_21_OUTPUT		413	//  1.21/3(1.21/3.3/2*4096)
 
 #define	BAT_LEVEL_43_IDLE		1331      // 1.3 (1.3/4*4096)
 #define 	BAT_LEVEL_32_IDLE		1300      //  1.27 (1.27/4*4096)
@@ -183,15 +183,15 @@ typedef 	 unsigned long		u32;
 #define BAT_INITIAL_VOLT_FULL		2284		// 1.45 (1.45/2.6*4096)
 
 //output
-#define MIN_VBAT_CHANNEL_1_IDLE	 3780  //(4.7/2=2.4V   2.4/2.6*4096)
-#define MIN_VBAT_OUPUT				787	//(1/2=0.5	0.5/2.6*4096)
-#define MIN_VBAT_OUTPUT_IDLE		1024	// (1.3/2 = 0.65  0.65/2.6*4096)
-#define	OUTPUT_SHOW_LEVEL_3		1024	//(1.3/2  0.65/2.6*4096 )
-#define	OUTPUT_SHOW_LEVEL_2		984	//(1.25/2 0.625/2.6*4096)
+#define MIN_VBAT_CHANNEL_1_IDLE	 2468  //(4.7/3=2.4V   2.4/2.6*4096)
+#define MIN_VBAT_OUPUT				525	//(1/3=0.5	0.5/2.6*4096)
+#define MIN_VBAT_OUTPUT_IDLE		619	// (1.18/3 = 0.41  0.65/4*4096)
+#define	OUTPUT_SHOW_LEVEL_3		682	//(1.3/3  0.65/4*4096 )
+#define	OUTPUT_SHOW_LEVEL_2		656	//(1.25/3 0.625/4*4096)	
 
-#define	BAT_LEVEL_43_OUTPUT		992      // 1.26/2 (1.26/2.6/2*4096)
-#define 	BAT_LEVEL_32_OUTPUT		968      //  1.23 (1.23/2.6/2*4096)
-#define   BAT_LEVEL_21_OUTPUT		953	//  1.21 (1.21/2.6/2*4096)
+#define	BAT_LEVEL_43_OUTPUT		661      // 1.26/3 (1.26/3.3/2*4096)
+#define 	BAT_LEVEL_32_OUTPUT		645      //  1.23/3 (1.23/3.3/2*4096)
+#define   BAT_LEVEL_21_OUTPUT		635	//  1.21/3(1.21/3.3/2*4096)
 
 #define	BAT_LEVEL_43_IDLE		2048      // 1.3 (1.3/2.6*4096)
 #define 	BAT_LEVEL_32_IDLE		2000      //  1.27 (1.27/2.6*4096)

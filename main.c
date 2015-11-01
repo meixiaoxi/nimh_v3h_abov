@@ -126,6 +126,7 @@ do
 		if(/*gOutputStatus == OUTPUT_STATUS_WAIT  ||*/ getDiffTickFromNow(ChargingTimeTick) > OUTPUT_CHECK_INTERVAL)
 		{
 			ChargingTimeTick = getSysTick();
+			#if 0
 			preVoltData[0] = getAverage(7);
 			if(preVoltData[0] <85)
 			{
@@ -141,6 +142,7 @@ do
 					}
 				}
 			}
+			#endif
 			preVoltData[0] = getVbatAdc(1);
 			if(gOutputStatus == OUTPUT_STATUS_WAIT)
 			{
@@ -151,7 +153,7 @@ do
 					preVoltData[cur_detect_pos] = getVbatAdc(cur_detect_pos+1);
 
 					if(cur_detect_pos == 2 || cur_detect_pos == 3)
-						preVoltData[cur_detect_pos] = preVoltData[cur_detect_pos]/2;
+						preVoltData[cur_detect_pos] = preVoltData[cur_detect_pos]/3;
 					
 					gBatVoltArray[0][0] = preVoltData[cur_detect_pos-1] -preVoltData[cur_detect_pos];
 					if(gBatVoltArray[0][0] < gBatVoltArray[1][0])

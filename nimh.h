@@ -28,7 +28,7 @@ typedef 	 unsigned long		u32;
 #define	BAT_REMOVE		1
 
 
-#define HAS_BATTERY		0x01   
+#define HAS_BATTERY		0x01  
 
 #define CHARGE_STATE_ALL		0x3C
 
@@ -41,8 +41,9 @@ typedef 	 unsigned long		u32;
 #define BAT_DETECT_BIT						(1<<1)   //电池测试
 #define BAT_CHECK_BIT						(1<<0)   //有无电池
 
+#define CHARGE_STATE_SPEC					0x01
 
-#define LDO_LEVEL	4000
+#define LDO_LEVEL	3300
 
 #if (LDO_LEVEL == 3300)
 #warning "3.3v ldo"
@@ -228,9 +229,9 @@ typedef 	 unsigned long		u32;
 
 #define MIN_BAT_LEVEL_UPDATE_INTERVAL	7324 //120000	2000/16.384
 #define BAT_CHARGING_PULSE_TIME	30   //2000ms  2000/16.384
-#define BAT_CHARGING_PULSE_DELAY_TIME	33//1100ms
-#define BAT_CHARGING_DETECT_TIME	122
-#define BAT_CHARGING_PWMOFF_DETECT_TIME	90		// 1.5S
+#define BAT_CHARGING_PULSE_DELAY_TIME	31//1100ms
+#define BAT_CHARGING_DETECT_TIME	33
+#define BAT_CHARGING_PWMOFF_DETECT_TIME	30		// 500
 
 #define BAT_CHARGING_DELAY_FROM_OUTPUT	60  // 1000ms
 
@@ -253,7 +254,8 @@ typedef 	 unsigned long		u32;
 #define FAST_SKIP_COUNT	0
 #define SUP_SKIP_COUNT		0
 #define PRE_SKIP_COUNT		0
-#define TRI_SKIP_COUNT		10
+#define TRI_SKIP_COUNT		5
+#define SPEC_SKIP_COUNT	5
 #define DUMMY_SKIP_COPUNT	0xFF
 
 #define CHANNEL_VBAT_1	10
@@ -271,9 +273,10 @@ typedef 	 unsigned long		u32;
 #define BAT_VALID_VALUE	787
 
 #define SHOW_CHARGING_TICK	0x40
+#define SHOW_OUTPUT_TICK		610		//10s  10*1000/16.384
 
 #define LED_DISPLAY_INTERVAL	122		// 2s 2*1000/16.384
-
+#define MIN_BAT_LEVEL_CHANGE   54931              // 15min  15*60*1000/16.384 
 
 //output
 #define OUTPUT_STATUS_WAIT	0

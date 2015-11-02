@@ -5,6 +5,8 @@ extern u8 gBatLeveL[4];
 extern u8 gSysStatus;
 extern u8 gOutputStatus;
 extern u16 gBatVoltArray[4][1];
+extern u32 idata gLastChangeLevelTick[4];
+extern u8 idata gIsFisrtChangeLevel[4];
 void LED_ON(u8 led)
 {
 	switch(led)
@@ -140,10 +142,50 @@ if(gSysStatus == SYS_CHARGING_STATE)
 	}
 }
 else
-{	
+{
 	if(gOutputStatus == OUTPUT_STATUS_NORMAL)
-	{		
-		if(getSysTick() & SHOW_CHARGING_TICK)
+	{	
+		if(gIsFisrtChangeLevel[0])
+		{
+			if(gIsFisrtChangeLevel[1])
+			{
+				if(getDiffTickFromNow(gLastChangeLevelTick[0]) > SHOW_CHARGING_TICK)
+				{
+					for(i=1;i<5;i++)
+					{
+						LED_OFF(i);
+					}
+					gIsFisrtChangeLevel[1] = 0;  //灭灯
+					gLastChangeLevelTick[0] = getSysTick();
+				}
+			}
+			else
+			{
+				if(getDiffTickFromNow(gLastChangeLevelTick[0]) > SHOW_OUTPUT_TICK)
+				{
+					for(i=1;i<=gBatLeveL[gCount];i++)
+					{	
+						LED_ON(i);
+					}
+					gIsFisrtChangeLevel[1] = 1;  //亮灯
+					gLastChangeLevelTick[0] = getSysTick();
+				}
+			}
+		}
+		else
+		{
+			for(i=1;i<=gBatLeveL[gCount];i++)
+			{	
+				LED_ON(i);
+			}
+			gIsFisrtChangeLevel[0] =1;    //第一次进入
+			gIsFisrtChangeLevel[1] = 1;  //亮灯
+			gLastChangeLevelTick[0] = getSysTick();
+		}
+
+		
+		#if 0
+		if(getSysTick() & SHOW_OUTPUT_TICK)
 		{
 			for(i=1;i<=gBatLeveL[gCount];i++)
 			{	
@@ -157,9 +199,9 @@ else
 				LED_OFF(i);
 			}
 		}
+		#endif
 	}
 }
 	
 	
 }
-

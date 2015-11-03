@@ -277,6 +277,7 @@ typedef 	 unsigned long		u32;
 
 #define LED_DISPLAY_INTERVAL	122		// 2s 2*1000/16.384
 #define MIN_BAT_LEVEL_CHANGE   54931              // 15min  15*60*1000/16.384 
+#define MIN_BAT_LEVEL_CHANGE_OUTPUT	29296			  // 8min   8*60*1000/16.384
 
 //output
 #define OUTPUT_STATUS_WAIT	0

@@ -95,7 +95,7 @@ void updateBatLevel(u16 tempV,u8 batNum)
 				}
 				else
 				{
-					if(getDiffTickFromNow(gLastChangeLevelTick[batNum-1]) > MIN_BAT_LEVEL_CHANGE)
+					if(getDiffTickFromNow(gLastChangeLevelTick[batNum-1]) > MIN_BAT_LEVEL_CHANGE || level > (gBatLeveL[batNum-1]+1))
 					{
 						gBatLeveL[batNum - 1]++;
 						gLastChangeLevelTick[batNum-1] = getSysTick();
@@ -123,7 +123,22 @@ void updateBatLevel(u16 tempV,u8 batNum)
 		if(gBatLeveL[batNum-1])
 		{
 			if(level < gBatLeveL[batNum-1])
-				gBatLeveL[batNum-1] = level;
+			{
+				if(gIsFisrtChangeLevel[2] == 0)
+				{
+					gBatLeveL[batNum-1]--;
+					gLastChangeLevelTick[1] = getSysTick();
+					gIsFisrtChangeLevel[2]  = 1;
+				}
+				else
+				{
+					if(getDiffTickFromNow(gLastChangeLevelTick[1]) > MIN_BAT_LEVEL_CHANGE_OUTPUT || level < (gBatLeveL[batNum-1]-1))
+					{
+						gBatLeveL[batNum - 1]--;
+						gLastChangeLevelTick[1] = getSysTick();
+					}
+				}
+			}
 		}
 		else
 			gBatLeveL[batNum-1] = level;

@@ -71,6 +71,7 @@ if(gSysStatus == SYS_CHARGING_STATE)
 	{
 	if(getDiffTickFromNow(ledDispalyTick) > LED_DISPLAY_INTERVAL)
 	{
+		#ifdef LED_CHARGING_DISPLAY_SUPPORT
 		if(isFirst == 0)
 		{
 			for(i=0;i<4;i++)
@@ -118,6 +119,24 @@ if(gSysStatus == SYS_CHARGING_STATE)
 				ledDispalyTick = getSysTick();
 			}
 		}
+		#else
+		if(getSysTick() & 0x10)
+		{
+			for(i=1;i<5;i++)
+			{
+				if((gBatStateBuf[i] & CHARGE_STATE_ALL)&& (gBatStateBuf[i]&(CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) ==0)
+					LED_ON(i);
+			}
+		}
+		else
+		{
+			for(i=1;i<5;i++)
+			{
+				if((gBatStateBuf[i] & (CHARGE_STATE_FULL | CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) == 0)
+					LED_OFF(i);		
+			}
+		}
+		#endif
 		
 	}
 	}while(0);

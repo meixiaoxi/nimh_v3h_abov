@@ -7,6 +7,7 @@ extern u8 gOutputStatus;
 extern u16 gBatVoltArray[4][1];
 extern u32 idata gLastChangeLevelTick[4];
 extern u8 idata gIsFisrtChangeLevel[4];
+extern u32 shortTick;
 void LED_ON(u8 led)
 {
 	switch(led)
@@ -19,6 +20,8 @@ void LED_ON(u8 led)
 			P36=0;break;
 		case 4:
 			P37=0;break;
+		default:
+			break;
 	}
 }
 
@@ -34,6 +37,8 @@ void LED_OFF(u8 led)
 			P36=1;break;
 		case 4:
 			P37=1;break;
+		default:
+			break;
 	}	
 }
 
@@ -119,28 +124,29 @@ if(gSysStatus == SYS_CHARGING_STATE)
 				ledDispalyTick = getSysTick();
 			}
 		}
-		#else
-		if(getSysTick() & 0x10)
-		{
-			for(i=1;i<5;i++)
-			{
-				if((gBatStateBuf[i] & CHARGE_STATE_ALL)&& (gBatStateBuf[i]&(CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) ==0)
-					LED_ON(i);
-			}
-		}
-		else
-		{
-			for(i=1;i<5;i++)
-			{
-				if((gBatStateBuf[i] & (CHARGE_STATE_FULL | CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) == 0)
-					LED_OFF(i);		
-			}
-		}
 		#endif
 		
 	}
 	}while(0);
-
+	
+	#ifndef LED_CHARGING_DISPLAY_SUPPORT
+	if(getSysTick() & SHOW_CHARGING_TICK)
+	{
+		for(i=1;i<5;i++)
+		{
+			if((gBatStateBuf[i] & CHARGE_STATE_ALL)&& (gBatStateBuf[i]&(CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) ==0)
+				LED_ON(i);
+		}
+	}
+	else
+	{
+		for(i=1;i<5;i++)
+		{
+			if((gBatStateBuf[i] & (CHARGE_STATE_FULL | CHARGE_STATE_ERROR | BAT_TYPE_ERROR)) == 0)
+				LED_OFF(i);		
+		}
+	}
+	#endif
 	//error state
 
 	if(getSysTick() & 0x08)
@@ -164,6 +170,7 @@ else
 {
 	if(gOutputStatus == OUTPUT_STATUS_NORMAL)
 	{	
+		#ifdef LED_OUTPUT_DISPLAY_SUPPORT
 		if(gIsFisrtChangeLevel[0])
 		{
 			if(gIsFisrtChangeLevel[1])
@@ -219,6 +226,79 @@ else
 			}
 		}
 		#endif
+		#else
+		/*********
+		gIsFisrtChangeLevel[0]用于轮流闪开始的标志
+		gIsFisrtChangeLevel[1]用于放电状态下初始四个灯亮的结束标志
+		gIsFisrtChangeLevel[2]用于表示当前处于亮灯状态的灯
+		gIsFisrtChangeLevel[3]用于轮流亮时亮/灭的标志
+
+		**********/
+		if(gIsFisrtChangeLevel[1])
+		{
+			if(gIsFisrtChangeLevel[0])
+			{
+				if(gIsFisrtChangeLevel[3])  //亮
+				{
+					if(getDiffTickFromNow(gLastChangeLevelTick[0]) > LED_DISPLAY_ON)
+					{
+						LED_OFF(gIsFisrtChangeLevel[2]);
+						if(gIsFisrtChangeLevel[2] ==4)
+							gIsFisrtChangeLevel[2] =1;
+						else
+							gIsFisrtChangeLevel[2]++;
+						gLastChangeLevelTick[0] = getSysTick();
+						gIsFisrtChangeLevel[3] = 0;
+					}
+				}
+				else  //灭
+				{
+					if(getDiffTickFromNow(gLastChangeLevelTick[0]) > LED_DISPLAY_OFF)
+					{
+						LED_ON(gIsFisrtChangeLevel[2]);
+						gLastChangeLevelTick[0] = getSysTick();
+						gIsFisrtChangeLevel[3] = 1;
+					}
+				}
+			}
+		      else //第一次
+		      {
+				gIsFisrtChangeLevel[0] = 1;
+				gIsFisrtChangeLevel[2] =1;
+				gIsFisrtChangeLevel[3] = 1;
+				LED_ON(1);
+				gLastChangeLevelTick[0] = getSysTick();
+			}
+		}
+		else
+		{
+			if(gLastChangeLevelTick[0])
+			{
+				if(getDiffTickFromNow(gLastChangeLevelTick[0]) > LED_INITIAL_DISPLAY)
+				{
+					for(i=1;i<5;i++)
+						LED_OFF(i);
+				}
+				if(getDiffTickFromNow(gLastChangeLevelTick[0]) > LED_INITIAL_DISPLAY_END)
+				{
+					gIsFisrtChangeLevel[1]=1;
+				}
+			}
+			else
+			{
+				for(i=1;i<5;i++)
+					LED_ON(i);
+				gLastChangeLevelTick[0] = getSysTick();
+				if(gLastChangeLevelTick[0] == 0)
+				{
+					EA = 0;
+					shortTick = 1;
+					EA =1;
+					gLastChangeLevelTick[0] = 1;
+				}
+			}
+		}
+	#endif
 	}
 }
 	

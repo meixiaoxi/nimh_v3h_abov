@@ -275,6 +275,11 @@ typedef 	 unsigned long		u32;
 #define SHOW_CHARGING_TICK	0x40
 #define SHOW_OUTPUT_TICK		610		//10s  10*1000/16.384
 
+#define LED_INITIAL_DISPLAY		61		// 1s 10000/16.384
+#define LED_INITIAL_DISPLAY_END	120	// 2s 
+#define LED_DISPLAY_ON			30		//500ms
+#define LED_DISPLAY_OFF		120		// 2s
+
 #define LED_DISPLAY_INTERVAL	122		// 2s 2*1000/16.384
 #define MIN_BAT_LEVEL_CHANGE   54931              // 15min  15*60*1000/16.384 
 #define MIN_BAT_LEVEL_CHANGE_OUTPUT	29296			  // 8min   8*60*1000/16.384

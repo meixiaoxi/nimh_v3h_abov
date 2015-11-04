@@ -75,6 +75,7 @@ void updateBatLevel(u16 tempV,u8 batNum)
 
 	if(gSysStatus == SYS_CHARGING_STATE)
 	{
+		#ifdef LED_CHARGING_DISPLAY_SUPPORT
 		if(tempV > BAT_LEVEL_34_CHARGING)
 			level = 4;
 		else if(tempV > BAT_LEVEL_23_CHARGING)
@@ -108,9 +109,11 @@ void updateBatLevel(u16 tempV,u8 batNum)
 		{
 			gBatLeveL[batNum-1] = level;
 		}
+		#endif
 	}
 	else
 	{
+		#ifdef LED_OUTPUT_DISPLAY_SUPPORT
 		if(tempV > BAT_LEVEL_43_OUTPUT)
 			level = 4;
 		else if(tempV > BAT_LEVEL_32_OUTPUT)
@@ -142,6 +145,7 @@ void updateBatLevel(u16 tempV,u8 batNum)
 		}
 		else
 			gBatLeveL[batNum-1] = level;
+		#endif
 	}
 	
 	gUpdateDebanceTick[batNum-1] = getSysTick();
@@ -151,6 +155,7 @@ void updateBatLevel(u16 tempV,u8 batNum)
 void outputHandler()
 {
 	u8 cur_detect_pos;
+
 do
 {
 	if(gOutputStatus != OUTPUT_STATUS_STOP)

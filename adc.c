@@ -47,9 +47,9 @@ u16 getAverage(u8 channel)
 	ret= temp;
 	max =temp;
 	min = temp;
-	for(i=0;i<5;i++)
+	for(i=0;i<9;i++)
 	{
-		delay_us(100);
+		//delay_us(100);
 		 temp = getAdcValue(channel);
 	 	if(temp > max)
 	 	{
@@ -64,7 +64,7 @@ u16 getAverage(u8 channel)
 	}
 	
 
-	return (ret - max - min)>>2;
+	return (ret - max - min)>>3;
 }
 
 u16 getBatTemp(u8 batNum)

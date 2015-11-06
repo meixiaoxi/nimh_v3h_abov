@@ -40,6 +40,8 @@ u16 gLowCurrentCount=0;
 u8 skipCount;
 u16 isPwmOn = 0;
 
+u16 idata gErrorCount[4] = 0;
+
 u8 dropCount[4] = {0,0,0,0};	
 u8 fitCount[4] = {0,0,0,0};
 
@@ -546,6 +548,7 @@ void removeBat(u8 toChangeBatPos)
 	preVoltData[gBatNowBuf[toChangeBatPos]-1] = 0;
 	gIsFisrtChangeLevel[gBatNowBuf[toChangeBatPos] -1] = 0;
 	gLastChangeLevelTick[gBatNowBuf[toChangeBatPos]-1] = 0;
+	gErrorCount[gBatNowBuf[toChangeBatPos]-1] = 0;
 	LED_OFF(gBatNowBuf[toChangeBatPos]);
 	//PB &= 0xF0;   //close current pwm channel
 	PwmControl(PWM_OFF);
@@ -580,6 +583,7 @@ void removeAllBat()
 		gAdcCount[i] = 0;
 		gIsFisrtChangeLevel[i] = 0;
 		gLastChangeLevelTick[i] = 0;
+		gErrorCount[i] = 0;
 	}
 	gBatNowBuf[4]=0;
 	gBatStateBuf[4] =0;
@@ -758,6 +762,25 @@ void chargeHandler(void)
 		}
 		 else if(getDiffTickFromNow(ChargingTimeTick)  > BAT_CHARGING_PULSE_TIME)   //change to next channel
 		{	
+			if(gIsChargingBatPos != 0 && isPwmOn)
+			{
+				tempV = getVbatAdc(gBatNowBuf[gIsChargingBatPos]);
+				if(gBatNowBuf[gIsChargingBatPos] == 4)
+					isPwmOn = BAT_MAX_VOLT_CLOSE_CHANNEL_4;
+				else
+					isPwmOn = BAT_MAX_VOLT_CLOSE;
+				if(tempV > isPwmOn)
+				{
+					gErrorCount[gBatNowBuf[gIsChargingBatPos] - 1]++;
+					if(gErrorCount[gBatNowBuf[gIsChargingBatPos]-1] >2)
+					{
+						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] &= ~(BAT_DETECT_BIT |CHARGE_STATE_ALL);
+						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= BAT_TYPE_ERROR;
+					}
+				}
+				else
+					gErrorCount[gBatNowBuf[gIsChargingBatPos] - 1] = 0;
+			}
 			//PB &= 0xF0;   //close current pwm channel
 			PwmControl(PWM_OFF);
 

@@ -43,6 +43,9 @@ typedef 	 unsigned long		u32;
 
 #define CHARGE_STATE_SPEC					0x01
 
+#define BAT_ZERO_DETECT_TICK			6	  // 100ms 100/16.384
+#define BAT_ZERO_VOLT_OPEN			20
+
 #define LDO_LEVEL	3300
 
 #if (LDO_LEVEL == 3300)
@@ -94,6 +97,8 @@ typedef 	 unsigned long		u32;
 #define	BAT_LEVEL_43_IDLE		1613      // 1.3 (1.3/3.3*4096)
 #define 	BAT_LEVEL_32_IDLE		1576      //  1.27 (1.27/3.3*4096)
 #define   BAT_LEVEL_21_IDLE		1551	//  1.25 (1.25/3.3*4096)
+
+#define BAT_ZERO_SPEC_VOLT		3103		// 2.5 (2.5/3.3*4096) 
 
 //temperature adc
 #define 	ADC_TEMP_MAX	1260    //48
@@ -147,6 +152,8 @@ typedef 	 unsigned long		u32;
 #define 	BAT_LEVEL_32_IDLE		1300      //  1.27 (1.27/4*4096)
 #define   BAT_LEVEL_21_IDLE		1280	//  1.25 (1.25/4*4096)
 
+#define BAT_ZERO_SPEC_VOLT		2560		// 2.5 (2.5/4*4096) 
+
 //temperature adc
 #define 	ADC_TEMP_MAX	1260    //48
 #define	ADC_TEMP_MIN	3007	//0
@@ -197,6 +204,8 @@ typedef 	 unsigned long		u32;
 #define	BAT_LEVEL_43_IDLE		2048      // 1.3 (1.3/2.6*4096)
 #define 	BAT_LEVEL_32_IDLE		2000      //  1.27 (1.27/2.6*4096)
 #define   BAT_LEVEL_21_IDLE		1969	//  1.25 (1.25/2.6*4096)
+
+#define BAT_ZERO_SPEC_VOLT		3938		// 2.5 (2.5/2.6*4096) 
 
 //temperature adc
 #define 	ADC_TEMP_MAX	1260    //48

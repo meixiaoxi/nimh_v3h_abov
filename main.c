@@ -48,6 +48,11 @@ u8 fitCount[4] = {0,0,0,0};
 u32 idata gChargingTimeTick[4] ={0,0,0,0};
 u32 idata gLastChangeLevelTick[4]= {0,0,0,0};
 u8   idata gIsFisrtChangeLevel[4] = {0,0,0,0};
+//zero relevant
+u8 idata gBatZeroDetectPos = 1;
+u8 idata gIsZeroPwmOn = 0;
+u32 idata gZeroSysTick;
+u8 idata gBatFromZero=0;
 
 void updateBatLevel(u16 tempV,u8 batNum)
 {
@@ -276,6 +281,7 @@ void PreCharge(u8 batNum)
 				gChargingTimeTick[batNum-1] = 0;
 				gBatStateBuf[batNum] &= ~CHARGE_STATE_PRE;
 				gBatStateBuf[batNum] |= CHARGE_STATE_FAST;
+				gBatFromZero &= ~(1<<batNum);
 			}
 			else
 			{
@@ -549,6 +555,7 @@ void removeBat(u8 toChangeBatPos)
 	gIsFisrtChangeLevel[gBatNowBuf[toChangeBatPos] -1] = 0;
 	gLastChangeLevelTick[gBatNowBuf[toChangeBatPos]-1] = 0;
 	gErrorCount[gBatNowBuf[toChangeBatPos]-1] = 0;
+	gBatFromZero &= ~(1<<gBatNowBuf[toChangeBatPos]);
 	LED_OFF(gBatNowBuf[toChangeBatPos]);
 	//PB &= 0xF0;   //close current pwm channel
 	PwmControl(PWM_OFF);
@@ -601,6 +608,79 @@ void removeAllBat()
 	gPreChargingBatPos = 0;
 }
 
+void openChannel(u8 status)
+{
+	if(status == PWM_OFF)
+	{	
+		gIsZeroPwmOn =0;
+		switch(gBatZeroDetectPos)
+		{
+			case 1:
+				P30 =0;
+				break;
+			case 2:
+				P31 =0;
+				break;
+			case 3:
+				P33 =0;
+				break;
+			case 4:
+				P23 =0;
+				break;
+			default:
+				break;
+		}
+	}
+	else
+	{
+		gIsZeroPwmOn =1;
+		switch(gBatZeroDetectPos)
+		{
+			case 1:
+				P30 =1;
+				break;
+			case 2:
+				P31 =1;
+				break;
+			case 3:
+				P33 =1;
+				break;
+			case 4:
+				P23 =1;
+				break;
+			default:
+				break;
+		}			
+	}
+}
+void zeroDetect()
+{
+	u16 tempV;
+		if(gIsZeroPwmOn == 0)
+		{
+			if(gBatZeroDetectPos ==4)
+				gBatZeroDetectPos = 1;
+			else
+				gBatZeroDetectPos++;
+			openChannel(PWM_ON);
+			gZeroSysTick = getSysTick();
+		}
+		else
+		{
+			if(getDiffTickFromNow(gZeroSysTick) > BAT_ZERO_DETECT_TICK)
+			{
+				tempV = getVbatAdc(gBatZeroDetectPos);
+				if(tempV < BAT_ZERO_SPEC_VOLT)
+				{
+					gBatStateBuf[gBatZeroDetectPos] |= (CHARGE_STATE_FAST|BAT_DETECT_BIT);
+					gBatNumNow =1;
+					gBatNowBuf[gBatNumNow] = gBatZeroDetectPos;
+				}
+			 	openChannel(PWM_OFF);
+			}
+		}
+}
+
 void chargeHandler(void)
 {
 	u16 tempV;
@@ -609,7 +689,11 @@ void chargeHandler(void)
 	//PB &= 0xF0;
 
 	if(gBatNumNow ==0)
+	{
+		if(isFromOutput == 0)
+			zeroDetect();
 		return;
+	}
 
 	if(ChargingTimeTick == 0)   
 	{
@@ -640,8 +724,10 @@ void chargeHandler(void)
 		if(gIsChargingBatPos !=0)    //0 pos is a dummy
 		{
 			//电池类型错误    充电错误
-			if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & ((BAT_TYPE_ERROR) |(CHARGE_STATE_ERROR)))
+			if((gBatFromZero & (1<< gBatNowBuf[gIsChargingBatPos]))== 0)
 			{
+			if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & ((BAT_TYPE_ERROR) |(CHARGE_STATE_ERROR)))
+			{		
 				tempT = getBatTemp(gBatNowBuf[gIsChargingBatPos]);
 
 				if(tempT> ADC_TEMP_MAX && tempT < ADC_TEMP_MIN)
@@ -656,6 +742,7 @@ void chargeHandler(void)
 				gBatVoltArray[gBatNowBuf[gIsChargingBatPos]-1][0] = tempV;
 				return;	
 			}
+			}
 	
 			if(gChargeSkipCount[gBatNowBuf[gIsChargingBatPos]-1] >=skipCount)   //ok, it's pulse now
 			{
@@ -663,6 +750,21 @@ void chargeHandler(void)
 				PB &= 0xF0;   //close all pwm
 				PB |= (1<<(gBatNowBuf[gIsChargingBatPos]-1));
 				*/
+				if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_DETECT_BIT)
+				{
+					tempV = getVbatAdc(gBatNowBuf[gIsChargingBatPos]);
+					if(tempV < BAT_ZERO_VOLT_OPEN)
+					{
+						gBatFromZero |= (1 << (gBatNowBuf[gIsChargingBatPos]));
+					}
+					else if(tempV > BAT_MAX_VOLT_OPEN)
+					{
+						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] &= ~(BAT_DETECT_BIT | CHARGE_STATE_FAST);
+						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= (BAT_TYPE_ERROR|HAS_BATTERY);
+						return;
+					}
+				}
+				
 				PwmControl(PWM_ON);
 				gChargeSkipCount[gBatNowBuf[gIsChargingBatPos]-1] = 0;
 				isPwmOn =1;
@@ -687,7 +789,7 @@ void chargeHandler(void)
 					else
 						isPwmOn = BAT_MAX_VOLT_CLOSE;
 					
-					 if(tempV>isPwmOn || tempV < BAT_MIN_VOLT_OPEN || gChargeCurrent <3  )
+					 if(tempV>isPwmOn || gChargeCurrent <3  )
 					{
 						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] &= ~(BAT_DETECT_BIT |CHARGE_STATE_ALL);
 						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= BAT_TYPE_ERROR;
@@ -701,7 +803,7 @@ void chargeHandler(void)
 				//PB &= 0xF0;
 				PwmControl(PWM_OFF);
 				
-				if(tempV<BAT_MIN_VOLT_OPEN)   //电池被拔出
+				if(tempV<BAT_MIN_VOLT_OPEN &&(gBatFromZero & (1<< gBatNowBuf[gIsChargingBatPos])) == 0)   //电池被拔出
 				{
 					ChargingTimeTick = 0;
 					removeBat(gIsChargingBatPos);
@@ -741,7 +843,7 @@ void chargeHandler(void)
 						else
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= (CHARGE_STATE_TRICK | CHARGE_STATE_FULL);
 						*/
-						if(tempV< CHARGING_PRE_END_VOLT)
+						if(tempV< CHARGING_PRE_END_VOLT || (gBatFromZero & (1<< gBatNowBuf[gIsChargingBatPos])))
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_PRE;
 						else
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_FAST;
@@ -769,6 +871,7 @@ void chargeHandler(void)
 					isPwmOn = BAT_MAX_VOLT_CLOSE_CHANNEL_4;
 				else
 					isPwmOn = BAT_MAX_VOLT_CLOSE;
+				
 				if(tempV > isPwmOn)
 				{
 					gErrorCount[gBatNowBuf[gIsChargingBatPos] - 1]++;
@@ -777,13 +880,58 @@ void chargeHandler(void)
 						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] &= ~(BAT_DETECT_BIT |CHARGE_STATE_ALL);
 						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= BAT_TYPE_ERROR;
 					}
+					if(gBatFromZero & (1<< gBatNowBuf[gIsChargingBatPos]) == 1)
+					{
+						if(tempV > BAT_ZERO_SPEC_VOLT)
+						{
+							removeBat(gIsChargingBatPos);
+							return;
+						}
+					}
 				}
 				else
 					gErrorCount[gBatNowBuf[gIsChargingBatPos] - 1] = 0;
 			}
 			//PB &= 0xF0;   //close current pwm channel
 			PwmControl(PWM_OFF);
-
+			if(gBatStateBuf[gBatZeroDetectPos] == 0)
+			{
+				if(gIsZeroPwmOn)
+				{
+					gZeroSysTick++;
+					if(gZeroSysTick > 30)
+					{
+						tempV = getVbatAdc(gBatZeroDetectPos);
+						openChannel(PWM_OFF);
+						if(tempV < BAT_ZERO_SPEC_VOLT)
+						{
+							gBatStateBuf[gBatZeroDetectPos] |= (CHARGE_STATE_FAST|BAT_DETECT_BIT);
+							gBatNumNow++;	
+							gBatNowBuf[gBatNumNow] = gBatZeroDetectPos;
+						}				
+						if(gBatZeroDetectPos ==4)
+							gBatZeroDetectPos =1;
+						else
+							gBatZeroDetectPos++;
+					}
+					else
+						return;
+				}
+				else 
+				{
+					openChannel(PWM_ON);
+					gZeroSysTick = 0;
+					return;
+				}
+			}
+			else
+			{
+				if(gBatZeroDetectPos ==4)
+					gBatZeroDetectPos =1;
+				else
+					gBatZeroDetectPos++;
+			}
+			
 			//	if((gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & 0x38) == CHARGE_STATE_FAST)
 			//		FastCharge(gBatNowBuf[gIsChargingBatPos]);
 			//ENABLE_ADC_DELAY_DETECT
@@ -842,11 +990,21 @@ void chargeHandler(void)
 			}		  
 		}
 		else if(/*gIsChargingBatPos !=0 && */(getDiffTickFromNow(ChargingTimeTick) > BAT_CHARGING_TEST_TIME))
-		{
+		{	
 			if(gIsChargingBatPos != 0) //note here
 			{
-			tempV = getVbatAdc(gBatNowBuf[gIsChargingBatPos]);
-
+				tempV = getVbatAdc(gBatNowBuf[gIsChargingBatPos]);
+				
+				if(gBatFromZero & (1<< gBatNowBuf[gIsChargingBatPos]))
+				{
+					if(tempV > BAT_ZERO_SPEC_VOLT)
+						removeBat(gIsChargingBatPos);
+					if(gBatStateBuf[gBatNowBuf[gPreChargingBatPos]] & ((BAT_TYPE_ERROR) |(CHARGE_STATE_ERROR)))
+					{
+						PwmControl(PWM_OFF);
+					}
+					return;
+				}
 			//if((gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & 0x38) == CHARGE_STATE_TRICK)
 			//{
 			//	if(getDiffTickFromNow(ChargingTimeTick) > BAT_CHARGING_TRICK_TIME)
@@ -913,6 +1071,77 @@ void StatusCheck()
 			}
 		}	
 }
+
+//工厂测试
+void factoryTest()
+{
+	while(1)
+	{
+		gSysStatus = GET_SYS_STATUS();
+		if(gSysStatus == SYS_CHARGING_STATE)
+			break;
+		ClrWdt();
+	}
+	delay_ms(500);
+	for(gBatZeroDetectPos=1; gBatZeroDetectPos < 5; gBatZeroDetectPos++)
+	{
+		ClrWdt();
+		gBatVoltArray[gBatZeroDetectPos-1][0] = getVbatAdc(gBatZeroDetectPos);
+		if(gBatVoltArray[gBatZeroDetectPos-1][0] >1923 || gBatVoltArray[gBatZeroDetectPos-1][0] < 1799 )
+		{
+			fitCount[gBatZeroDetectPos-1] =1;
+			continue;
+		}
+		openChannel(PWM_ON);
+		delay_ms(700);
+		gBatVoltArray[gBatZeroDetectPos-1][0] = getVbatAdc(gBatZeroDetectPos);
+		if(gChargeCurrent < 40 || gChargeCurrent > 68)
+		{
+			fitCount[gBatZeroDetectPos-1] = 2;
+		}
+		
+		openChannel(PWM_OFF);
+	}
+
+	while(1)
+	{
+		gSysStatus = GET_SYS_STATUS();
+		if(gSysStatus == SYS_CHARGING_STATE)
+		{
+			for(gBatZeroDetectPos=1; gBatZeroDetectPos < 5; gBatZeroDetectPos++)
+			{
+				if(isFirst)
+				{
+					if(fitCount[gBatZeroDetectPos-1] !=0)
+					{
+						LED_OFF(gBatZeroDetectPos);
+					}
+				}
+				else
+				{
+					LED_ON(gBatZeroDetectPos);
+				}
+			}
+			delay_ms(150);
+			if(isFirst)
+				isFirst=0;
+			else
+				isFirst=1;
+		}
+		else
+		{
+			for(gBatZeroDetectPos=0; gBatZeroDetectPos < 4; gBatZeroDetectPos++)
+			{
+				if(fitCount[gBatZeroDetectPos] == 1)
+					LED_ON(gBatZeroDetectPos+1);
+			}
+		}
+		ClrWdt();
+	}
+		
+}
+
+
 void InitConfig()
 {					 
 					  //7     6      5      4             3               2                 1             0
@@ -984,6 +1213,8 @@ void main()
 
 	isFromOutput = 0;
 
+	//factoryTest();
+
 	gSysStatus =  GET_SYS_STATUS();
 	if(gSysStatus == SYS_DISCHARGE_STATE)
 	{
@@ -1000,7 +1231,7 @@ void main()
 		LED_OFF(1);
 		#endif
 		delay_ms(100);
-	
+
 	while(1)
 	{
 
@@ -1008,7 +1239,7 @@ void main()
 
 		if(gSysStatus == SYS_CHARGING_STATE)
 		{
-			if(gBatStateBuf[cur_detect_pos] & HAS_BATTERY)
+			if((gBatStateBuf[cur_detect_pos] & HAS_BATTERY) && ((gBatFromZero & (1<< cur_detect_pos) ) == 0))
 			{
 				
 				if(getVbatAdc(cur_detect_pos) < BAT_MIN_VOLT_OPEN)
@@ -1028,6 +1259,9 @@ void main()
 			{
 				if(isFromOutput == 0)
 				{
+					#if 0
+					if(gBatZeroDetectPos != cur_detect_pos)
+					{
 					if((gBatStateBuf[cur_detect_pos] & BAT_DETECT_BIT) == 0)
 					{	
 						gBatVoltArray[cur_detect_pos-1][0]=  getVbatAdc(cur_detect_pos);	//gBatVoltArray[cur_detect_pos-1][0]= getVbatAdc(cur_detect_pos);
@@ -1041,8 +1275,14 @@ void main()
 	
 								gBatNumNow++;	
 								gBatNowBuf[gBatNumNow] = cur_detect_pos;
+								if(gBatNumNow == 1)
+								{
+									P30 =0;P31 =0;P33 =0;P23 =0;
+								}
 						}
 					}
+					}
+					#endif
 				}
 				else
 				{

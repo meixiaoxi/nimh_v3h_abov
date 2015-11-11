@@ -120,6 +120,7 @@ typedef 	 unsigned long		u32;
 
 
 #define VIN_5V_MINUM			951			// 4.6  (4.6/6/3.3*4096)
+#define BAT_VOLT_NEAR_FULL		1762			// 1.42  1.42/3.3*4096
 
 //temperature adc
 #define 	ADC_TEMP_MAX	1260    //48
@@ -277,6 +278,8 @@ typedef 	 unsigned long		u32;
 #define BAT_CHARGING_FAST_MAX_COUNT		7200	// 1h (60min*60*1000/500)
 #define BAT_CHARGING_FAST_MAX_COUNT_AAA	6000	// 50min   (50*60*1000/500)
 #define BAT_INITIAL_FULL_CHECK_COUNT		180		// 1.5min  (90*1000/500)
+#define BAT_NEAR_FULL_MAX_COUNT			1200		//10min (10*60*1000/500)
+
 
 #define BAT_INITIAL_FULL_CHECK_TIME	10986			// 3min  (3*60*1000)/16.384
 #define BAT_DV_CHECK_INTERVAL			305			//5s  5*1000/16.384

@@ -10,6 +10,7 @@ u8 gPreChargingBatPos = 0;
 u32 shortTick=0;
 u32 ChargingTimeTick = 0;
 u16 gChargeCurrent;
+u16 idata gChargeCurrent_2;
 
 u8 gSysStatus;
 u8 gOutputStatus;
@@ -35,12 +36,11 @@ u16 preVoltData[4] ={0,0,0,0};
 
 u8 gAdcCount[4] = {0,0,0,0};
 
-u16 gLowCurrentCount=0;
 
 u8 skipCount;
 u16 isPwmOn = 0;
 
-u16 idata gErrorCount[4] = 0;
+u8 idata gErrorCount[4] = 0;
 
 u8 dropCount[4] = {0,0,0,0};	
 u8 fitCount[4] = {0,0,0,0};
@@ -53,7 +53,7 @@ u8 idata gBatZeroDetectPos = 1;
 u8 idata gIsZeroPwmOn = 0;
 u32 idata gZeroSysTick;
 u8 idata gBatFromZero=0;
-
+u8 idata gCurrentLevel[2];
 void updateBatLevel(u16 tempV,u8 batNum)
 {
 	u8 level;
@@ -296,6 +296,7 @@ void PreCharge(u8 batNum)
 		}
 }
 
+#if 0
 void specialCharge(u8 batNum)
 {
 	if(getDiffTickFromNow(gLastChangeLevelTick[batNum-1]) > MIN_BAT_LEVEL_CHANGE)
@@ -312,11 +313,12 @@ void specialCharge(u8 batNum)
 		}
 	}
 }
-
+#endif
 
 void FastCharge(u8 batNum)
 {
-	u16 tempV,tempT,tempAvg;
+	u16 tempV,tempT;
+	u32 overTimer = BAT_CHARGING_FAST_MAX_COUNT;
 
 	gChargingTimeTick[batNum-1]++;
 	tempT = getBatTemp(batNum);
@@ -371,7 +373,8 @@ void FastCharge(u8 batNum)
 				gChargingIntervalTick[batNum-1] = 1;
 			}
 			*/
-			
+			if(gBatStateBuf[batNum] & BAT_AAA_TYPE)
+				overTimer = BAT_CHARGING_FAST_MAX_COUNT_AAA;
 			if(tempV >= CHARGING_FAST_MAX_VOLT || gChargingTimeTick[batNum-1] > BAT_CHARGING_FAST_MAX_COUNT || tempT < ADC_TEMP_MAX || tempT > ADC_TEMP_MIN)
 			{
 				if((tempT < ADC_TEMP_MAX  && tempV <CHARGING_FAST_TEMP_END_VOLT) || tempT > ADC_TEMP_MIN)   //过温
@@ -387,14 +390,13 @@ void FastCharge(u8 batNum)
 				{
 					 //timer or maxVolt
 					gBatStateBuf[batNum] &= ~CHARGE_STATE_FAST;
-					gBatStateBuf[batNum] |= CHARGE_STATE_TRICK;
 					gBatStateBuf[batNum] |= CHARGE_STATE_FULL;
 
-					if(gBatLeveL[batNum-1] <4)
-					{
+					//if(gBatLeveL[batNum-1] <4)
+					//{
 						//gBatStateBuf[batNum] &= ~CHARGE_STATE_FULL;
 						//gBatStateBuf[batNum] |= CHARGE_STATE_SPEC;
-					}
+					//}
 						
 					gChargingTimeTick[batNum-1] = 0;
 				}
@@ -430,15 +432,14 @@ void FastCharge(u8 batNum)
 					if(dropCount[batNum-1] >3)
 					{
 					gBatStateBuf[batNum] &= ~CHARGE_STATE_FAST;
-					gBatStateBuf[batNum] |= CHARGE_STATE_TRICK;
 					gBatStateBuf[batNum] |= CHARGE_STATE_FULL;
 					gChargingTimeTick[batNum-1] = 0;
 
-					if(gBatLeveL[batNum-1] <4)
-					{
-						gBatStateBuf[batNum] &= ~CHARGE_STATE_FULL;
-						gBatStateBuf[batNum] |= CHARGE_STATE_SPEC;
-					}
+					//if(gBatLeveL[batNum-1] <4)
+					//{
+						//gBatStateBuf[batNum] &= ~CHARGE_STATE_FULL;
+						//gBatStateBuf[batNum] |= CHARGE_STATE_SPEC;
+					//}
 					
 					}
 				}
@@ -454,7 +455,6 @@ void FastCharge(u8 batNum)
 		if(tempV > BAT_INITIAL_VOLT_FULL && gChargingTimeTick[batNum-1] > BAT_INITIAL_FULL_CHECK_COUNT)
 		{
 			gBatStateBuf[batNum] &= ~CHARGE_STATE_FAST;
-			gBatStateBuf[batNum] |= CHARGE_STATE_TRICK;
 			gBatStateBuf[batNum] |= CHARGE_STATE_FULL;
 			gChargingTimeTick[batNum-1] = 0;
 		}
@@ -473,8 +473,14 @@ void SupCharge(u8 batLabel)
 
 }
 */
-void TrickCharge(u8 batNum)
+void FullCharge(u8 batNum)
 {
+/*
+	gBatVoltArray[batNum-1][0] = getBatTemp(batNum);
+	if(gBatVoltArray[batNum-1][0]<ADC_TEMP_MAX || gBatVoltArray[batNum-1][0] >ADC_TEMP_MIN)
+		gBatStateBuf[batNum] |= CHARGE_STATE_ERROR;
+*/
+#if 0
 	if(gBatStateBuf[batNum] & CHARGE_STATE_FULL)
 	{
 	}
@@ -490,6 +496,7 @@ void TrickCharge(u8 batNum)
 			//gChargingTimeTick[batNum-1] = 0;
 		}
 	}
+#endif
 }
 
 void PwmControl(unsigned char status)
@@ -685,6 +692,51 @@ void zeroDetect()
 		}
 }
 
+#ifdef DVT_BOARD
+void batTypeDetect()
+{
+	u8 i;
+	u16 temp_1,temp_2,max_1,max_2,min_1,min_2;
+
+	temp_1 = getAdcValue(CHANNEL_20_RES);
+	temp_2 = getAdcValue(CHANNEL_30_RES);
+	gChargeCurrent = temp_1;
+	gChargeCurrent_2 = temp_2;
+	max_1 =temp_1;
+	min_1 = temp_1;
+	max_2 = temp_2;
+	min_2 = temp_2;
+	for(i=0;i<9;i++)
+	{
+		//delay_us(100);
+		ClrWdt();
+		 temp_1 = getAdcValue(CHANNEL_20_RES);
+		 temp_2 = getAdcValue(CHANNEL_30_RES);
+	 	if(temp_1 > max_1)
+	 	{
+			max_1 = temp_1;
+	 	}
+
+		 if(temp_1 < min_1)
+		{
+			min_1 = temp_1;
+	 	}
+		if(temp_2 > max_2)
+	 	{
+			max_2 = temp_2;
+	 	}
+
+		 if(temp_2< min_2)
+		{
+			min_2 = temp_2;
+	 	}
+	 	gChargeCurrent += temp_1;
+		gChargeCurrent_2 += temp_2;
+	}
+	gChargeCurrent = (gChargeCurrent-max_1-min_1) >>3;
+	gChargeCurrent_2 = (gChargeCurrent_2-max_2-min_2)>>3;
+}
+#endif
 void chargeHandler(void)
 {
 	u16 tempV;
@@ -709,10 +761,8 @@ void chargeHandler(void)
 		//			skipCount = SUP_SKIP_COUNT;break;// BatSupCharge(ticknow%4);break;
 			case CHARGE_STATE_PRE:
 					skipCount = PRE_SKIP_COUNT;break;//BatPreCharge(ticknow%4);break;
-			case CHARGE_STATE_TRICK:
-					skipCount = TRI_SKIP_COUNT;break;//BatTrickCharge(ticknow%4);break;
-			case CHARGE_STATE_SPEC:
-					skipCount = SPEC_SKIP_COUNT;break;
+			case CHARGE_STATE_FULL:
+					skipCount = FULL_SKIP_COUNT;break;//BatTrickCharge(ticknow%4);break;
 			default:
 					break;
 		}
@@ -768,7 +818,20 @@ void chargeHandler(void)
 						return;
 					}
 				}
-				
+				else
+				{
+					if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_AAA_TYPE)
+					{
+						if(gCurrentLevel[0])  //7号小电流
+						{
+							
+						}
+					}
+					else if(gCurrentLevel[1])   //5号小电流
+					{
+						
+					}
+				}
 				PwmControl(PWM_ON);
 				gChargeSkipCount[gBatNowBuf[gIsChargingBatPos]-1] = 0;
 				isPwmOn =1;
@@ -785,17 +848,27 @@ void chargeHandler(void)
 			{
 				if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_TYPE_ERROR)
 					return;
+
 				tempV = getVbatAdc(gBatNowBuf[gIsChargingBatPos]);
 				if(isPwmOn)
 				{
-					if(gBatNowBuf[gIsChargingBatPos] == 4)
+					#ifdef DVT_BOARD
+					batTypeDetect();
+					if(gChargeCurrent_2 > gChargeCurrent)
+					{
+						if((gChargeCurrent_2-gChargeCurrent) > 7)
+							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= BAT_AAA_TYPE;
+					}
+					
+					#endif
+					if(gBatNowBuf[gIsChargingBatPos] == 4 || gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_AAA_TYPE)
 						isPwmOn = BAT_MAX_VOLT_CLOSE_CHANNEL_4;
 					else
 						isPwmOn = BAT_MAX_VOLT_CLOSE;
 					
 					 if(tempV>isPwmOn || gChargeCurrent <3  )
 					{
-						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] &= ~(BAT_DETECT_BIT |CHARGE_STATE_ALL);
+						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] =0;
 						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= BAT_TYPE_ERROR;
 						gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= HAS_BATTERY;
 						//PB &= 0xF0;   //close current pwm channel
@@ -803,6 +876,16 @@ void chargeHandler(void)
 						ChargingTimeTick = 0;
 						return;
 					}
+					 #ifdef DVT_BOARD
+					tempV = getAdcValue(CHANNEL_VIN_5V);
+					if(tempV < VIN_5V_MINUM)
+					{
+						if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_AAA_TYPE)
+							gCurrentLevel[0] = 1;
+						else
+							gCurrentLevel[1] = 1;
+					}
+					#endif
 				}
 				//PB &= 0xF0;
 				PwmControl(PWM_OFF);
@@ -833,20 +916,7 @@ void chargeHandler(void)
 					tempT = getBatTemp(gBatNowBuf[gIsChargingBatPos]);
 				
 
-				//	if(tempT < ADC_TEMP_MAX || tempT > ADC_TEMP_MIN)
-				//	{
-				//		gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_TRICK;
-				//	}
-				//	else
 					{
-						/*
-						if(gBatVoltArray[gBatNowBuf[gIsChargingBatPos]-1][0] < CHARGING_PRE_END_VOLT)
-							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_PRE;
-						else if(gBatVoltArray[gBatNowBuf[gIsChargingBatPos]-1][0] < CHARGING_FAST_END_VOLT)
-							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_FAST;
-						else
-							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= (CHARGE_STATE_TRICK | CHARGE_STATE_FULL);
-						*/
 						if(tempV< CHARGING_PRE_END_VOLT || (gBatFromZero & (1<< gBatNowBuf[gIsChargingBatPos])))
 							gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= CHARGE_STATE_PRE;
 						else
@@ -871,7 +941,7 @@ void chargeHandler(void)
 			if(gIsChargingBatPos != 0 && isPwmOn)
 			{
 				tempV = getVbatAdc(gBatNowBuf[gIsChargingBatPos]);
-				if(gBatNowBuf[gIsChargingBatPos] == 4)
+				if(gBatNowBuf[gIsChargingBatPos] == 4 || gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_AAA_TYPE)
 					isPwmOn = BAT_MAX_VOLT_CLOSE_CHANNEL_4;
 				else
 					isPwmOn = BAT_MAX_VOLT_CLOSE;
@@ -895,8 +965,26 @@ void chargeHandler(void)
 				}
 				else
 					gErrorCount[gBatNowBuf[gIsChargingBatPos] - 1] = 0;
+				#ifdef DVT_BOARD
+				tempV = getAdcValue(CHANNEL_VIN_5V);
+				if(tempV < VIN_5V_MINUM)
+				{
+					if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_AAA_TYPE)
+						gCurrentLevel[0] = 1;
+					else
+						gCurrentLevel[1] = 1;
+				}
+				else
+				{
+					if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_AAA_TYPE)
+						gCurrentLevel[0] = 0;
+					else
+						gCurrentLevel[1] = 0;
+				}
+				#endif
 			}
 			//PB &= 0xF0;   //close current pwm channel
+			
 			PwmControl(PWM_OFF);
 			if(gBatStateBuf[gBatZeroDetectPos] == 0)
 			{
@@ -968,10 +1056,8 @@ void chargeHandler(void)
 					//			 SupCharge(gBatNowBuf[gIsChargingBatPos]);break;
 						case CHARGE_STATE_PRE:
 								PreCharge(gBatNowBuf[gPreChargingBatPos]);break;
-						case CHARGE_STATE_TRICK:
-								TrickCharge(gBatNowBuf[gPreChargingBatPos]);break;
-						case CHARGE_STATE_SPEC:
-								specialCharge(gBatNowBuf[gPreChargingBatPos]);break;
+						case CHARGE_STATE_FULL:
+								FullCharge(gBatNowBuf[gPreChargingBatPos]);break;
 						default:
 							break;
 					}
@@ -1048,7 +1134,7 @@ void StatusCheck()
 				delay_ms(2);
 				if(gSysStatus != (GET_SYS_STATUS()))
 				{
-				gLowCurrentCount = 0;
+				//gLowCurrentCount = 0;
 				gSysStatus = SYS_DISCHARGE_STATE;
 				CHANGE_TO_OUTPUT();
 				gOutputStatus = OUTPUT_STATUS_WAIT;				

@@ -47,14 +47,15 @@ typedef 	 unsigned long		u32;
 
 #define HAS_BATTERY		0x01  
 
-#define CHARGE_STATE_ALL		0x3C
+#define CHARGE_STATE_ALL		0x38
 
 #define BAT_TYPE_ERROR						(1<<7)
 #define CHARGE_STATE_ERROR				(1<<6)
 #define CHARGE_STATE_PRE					(1<<5)
 #define CHARGE_STATE_FAST					(1<<4)
-#define CHARGE_STATE_TRICK					(1<<3)
-#define CHARGE_STATE_FULL					(1<<2)
+#define CHARGE_STATE_FULL					(1<<3)
+//#define CHARGE_STATE_TRICK					(1<<3)
+#define BAT_AAA_TYPE						(1<<2)
 #define BAT_DETECT_BIT						(1<<1)   //电池测试
 #define BAT_CHECK_BIT						(1<<0)   //有无电池
 
@@ -116,6 +117,9 @@ typedef 	 unsigned long		u32;
 #define   BAT_LEVEL_21_IDLE		1551	//  1.25 (1.25/3.3*4096)
 
 #define BAT_ZERO_SPEC_VOLT		3103		// 2.5 (2.5/3.3*4096) 
+
+
+#define VIN_5V_MINUM			951			// 4.6  (4.6/6/3.3*4096)
 
 //temperature adc
 #define 	ADC_TEMP_MAX	1260    //48
@@ -270,7 +274,8 @@ typedef 	 unsigned long		u32;
 
 #define BAT_CHARGING_PRE_MAX_COUNT	1200	// 10min   (10*60*1000)/500
 #define BAT_START_DV_COUNT	300                     // 2.5min (2.5*60*1000/500)
-#define BAT_CHARGING_FAST_MAX_COUNT		9000	// 1h15min (75min*60*1000/500)
+#define BAT_CHARGING_FAST_MAX_COUNT		7200	// 1h (60min*60*1000/500)
+#define BAT_CHARGING_FAST_MAX_COUNT_AAA	6000	// 50min   (50*60*1000/500)
 #define BAT_INITIAL_FULL_CHECK_COUNT		180		// 1.5min  (90*1000/500)
 
 #define BAT_INITIAL_FULL_CHECK_TIME	10986			// 3min  (3*60*1000)/16.384
@@ -280,7 +285,7 @@ typedef 	 unsigned long		u32;
 #define FAST_SKIP_COUNT	0
 #define SUP_SKIP_COUNT		0
 #define PRE_SKIP_COUNT		0
-#define TRI_SKIP_COUNT		5
+#define FULL_SKIP_COUNT		5
 #define SPEC_SKIP_COUNT	5
 #define DUMMY_SKIP_COPUNT	0xFF
 
@@ -294,7 +299,9 @@ typedef 	 unsigned long		u32;
 #define CHANNEL_TEMP_2		1
 
 #define CHANNEL_20_RES	9
+#define CHANNEL_30_RES 7
 
+#define CHANNEL_VIN_5V	3
 
 #define BAT_VALID_VALUE	787
 
@@ -326,7 +333,8 @@ u32 getDiffTickFromNow(u32 ttick);
 void ledHandler(void);
 void delay_us(u16);
 u32 getBatTick();
-	
+
+u16 getAdcValue(u8 channel);	
 u16 getVbatAdc(u8 channel);
 u16 getAverage(u8 channel);
 u16 getBatTemp(u8 batNum);

@@ -7,19 +7,36 @@ typedef  unsigned char		u8;
 typedef	 unsigned short 		u16;		
 typedef 	 unsigned long		u32;
 
+#define EVT_BOARD
+#define GET_FACTORY_STATUS()	(P2&0x20)
+
 #define		cli()		do{IE &= ~0x80;}while(0)
 #define		sei()		do{IE |=  0x80;}while(0)
 #define		NOP()		_nop_()
 #define 		ClrWdt()		WDTCR = 0xE0
-
+#ifdef EVT_BOARD
+#warning "evt version"
 #define 		GET_SYS_STATUS()	P1&0x01
+
 #define		CHANGE_TO_OUTPUT()	(P0IO |= (1<<2),P02 = 0,P2IO |= (1<<4),P24 = 0)
 #define		CHANGE_TO_INPUT()		(P0IO &= ~(1<<2),P2IO &=~(1<<4))
-#define PWM_ON	1
-#define PWM_OFF	 0
 
 #define SYS_CHARGING_STATE	0x00
 #define SYS_DISCHARGE_STATE	0x01
+#else
+#warning "dvt version"
+#define		GET_SYS_STATUS()	P0&0x04
+
+#define		CHANGE_TO_OUTPUT()	(P2IO |= (1<<4),P24 = 0)
+#define		CHANGE_TO_INPUT()		(P2IO &=~(1<<4))
+
+#define SYS_CHARGING_STATE	0x00
+#define SYS_DISCHARGE_STATE	0x04
+#endif
+
+#define PWM_ON	1
+#define PWM_OFF	 0
+
 #define SYS_CHARGING_STATE_DELAY	0x02
 
 #define	BAT_MAX_LABEL 		4
@@ -44,7 +61,7 @@ typedef 	 unsigned long		u32;
 #define CHARGE_STATE_SPEC					0x01
 
 #define BAT_ZERO_DETECT_TICK			6	  // 100ms 100/16.384
-#define BAT_ZERO_VOLT_OPEN			20
+#define BAT_ZERO_VOLT_OPEN			124
 
 #define LDO_LEVEL	3300
 

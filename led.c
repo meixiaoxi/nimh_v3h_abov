@@ -17,7 +17,11 @@ void LED_ON(u8 led)
 		case 2:
 			P34=0;break;
 		case 3:
+			#ifdef EVT_BOARD
 			P36=0;break;
+			#else
+			P00=0;break;
+			#endif
 		case 4:
 			P37=0;break;
 		default:
@@ -34,7 +38,11 @@ void LED_OFF(u8 led)
 		case 2:
 			P34=1;break;
 		case 3:
+			#ifdef EVT_BOARD
 			P36=1;break;
+			#else
+			P00=1;break;
+			#endif
 		case 4:
 			P37=1;break;
 		default:

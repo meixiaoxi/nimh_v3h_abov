@@ -1147,7 +1147,9 @@ void factoryTest()
 
 
 void InitConfig()
-{					 
+{
+
+   #ifdef EVT_BOARD
 					  //7     6      5      4             3               2                 1             0
        				  //-     -      -      -      Vin5V_DET   V2+_H_CTL     NTC2     iout_cc         
     P0IO    = 0xF0;         // out     out    out     out        input              input           input       input                 (0:input   1:output)
@@ -1167,7 +1169,7 @@ void InitConfig()
      P1FSRL  = 0x54;	 //                                                      010              10            10                 0 
     
                                     //-    -  boost_en     v1+_h_ctl   pwm4   -         -      -
-    P2IO    = 0x6F;         //-   out     out               input         out    out     out     out
+    P2IO    = 0x4F;         //-   out     input               input         out    out     out     out
     P2OD    = 0x00;         // -   PP      PP              PP             PP      PP      pp     pp
     P2PU    = 0x47;         // -    on     off              off             off     on      on     on
     P2	  = 0x00;		    // -      -      1      1      -      -      -      -
@@ -1179,6 +1181,39 @@ void InitConfig()
     P3PU    = 0x00;         // off       off      off        off       off       off       off       off
     P3	   = 0xF0;	//00000000
     P3FSR   = 0x00;		  // 0        0         0          0         0         0          0        0	
+    #else  //DVT BOARD
+    					  //7     6      5      4             3               2                 1             0
+       				  //-     -      -      -      Vin5V_DET   CHG_DISCHG    NTC2     led3         
+    P0IO    = 0xF5;         // out     out    out     out        input              out           input       out                 (0:input   1:output)
+    P0OD    = 0x00;        // -      pp     pp      pp            PP                PP               pp            pp                    (0:push-pull   1:open-drain)
+    P0PU    = 0x70;         // -      on      on       on           off                off             off           off                  (0:disable      1:enable)               
+    P0        = 0x01;	        // -      -       -         -              0              0                0               1
+    P03DB   = 0x00;       // 0       0      0       0               0              0                 0              0
+    P0FSR   = 0x12;       // 0      0      0       1               0              0                   1            0
+
+                                    //-     V4+_DET    NTC1   V2+_DET   V1+_DET   GND_ALL   V3+_DET   GND_ALL2
+    P1IO    = 0x80;         // out      input        input        input         input          input           input             inut
+    P1OD    = 0x00;        // pp        PP           PP           pp             PP             PP             PP                 pp
+    P1PU    = 0x80;        // on        off          off           off            off             off            off                 off
+    P1	  = 0x00;        // 00000000
+    P12DB   = 0x00;       // 00000000
+    P1FSRH  = 0x2A;      // 00       10            10            10
+     P1FSRL  = 0x55;	 //                                                      010              10            10                 1 
+    
+                                    //-    -  boost_en     v1+_h_ctl   pwm4   -         -      -
+    P2IO    = 0x4F;         //-   out     out               input         out    out     out     out
+    P2OD    = 0x00;         // -   PP      PP              PP             PP      PP      pp     pp
+    P2PU    = 0x47;         // -    on     off              off             off     on      on     on
+    P2	  = 0x00;		    // -      -      1      1      -      -      -      -
+    P2FSR   = 0x00;	   //             00000000
+
+                                     //led4    cur_ctl2    led1    led2    pwm3    CUR_CTL    pwm2   pwm1
+    P3IO    = 0xBB;         // out       input        out       out      out         input       out       out
+    P3OD    = 0x00;        // PP         PP      PP         PP       PP         PP       PP       PP
+    P3PU    = 0x00;         // off       off      off        off       off       off       off       off
+    P3	   = 0xB0;	//10110000
+    P3FSR   = 0x00;		  // 0        0         0          0         0         0          0        0	
+    #endif
 }
 
 void main()
@@ -1217,8 +1252,14 @@ void main()
 
 	isFromOutput = 0;
 
-	//factoryTest();
-
+	if(GET_FACTORY_STATUS())
+	{
+		factoryTest();
+	}
+	else
+	{
+		P2IO |= (1<<5);
+	}
 	gSysStatus =  GET_SYS_STATUS();
 	if(gSysStatus == SYS_DISCHARGE_STATE)
 	{

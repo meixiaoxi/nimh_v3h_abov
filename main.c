@@ -595,6 +595,10 @@ void removeAllBat()
 	gBatNowBuf[4]=0;
 	gBatStateBuf[4] =0;
 
+	gBatZeroDetectPos = 1;
+	gIsZeroPwmOn = 0;
+	gBatFromZero=0;
+	
 	//PWM
 	P30 =0;
 	P31 =0;

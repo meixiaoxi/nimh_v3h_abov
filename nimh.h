@@ -350,6 +350,6 @@ void LED_OFF(u8 led);
 void LED_ON(u8 led);
 
 void delay_ms(u16 nus);
-
+void openChannel(u8 status);
 
 #endif

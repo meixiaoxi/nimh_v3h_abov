@@ -633,6 +633,10 @@ void removeBat(u8 toChangeBatPos)
 	gIsChargingBatPos = 1;
 	gPreChargingBatPos = 0;
 	gIsInTwoState = 0;
+	if(gIsZeroPwmOn)
+	{
+		openChannel(PWM_OFF);
+	}
 }
 
 void removeAllBat()
@@ -862,15 +866,10 @@ void chargeHandler(void)
 					if(gBatNowBuf[gIsChargingBatPos] != gNowTwoBuf[0] && gBatNowBuf[gIsChargingBatPos] != gNowTwoBuf[1])
 					{
 						ChargingTimeTick = 0;
-						gPreChargingBatPos = gIsChargingBatPos;
+						//gPreChargingBatPos = gIsChargingBatPos;
 						if(gIsChargingBatPos >= gBatNumNow)
 						{
-							if(gBatNumNow%2)
-							{
-								gIsChargingBatPos =0;
-							}
-							else
-								gIsChargingBatPos =1;
+							gIsChargingBatPos =1;
 						}
 						else
 							gIsChargingBatPos++;	
@@ -883,20 +882,15 @@ void chargeHandler(void)
 
 			if(gIsInTwoState)
 			{
-				if((gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_DETECT_BIT)  == 0 && (gBatFromZero & (1<< (gBatNowBuf[gIsChargingBatPos])) == 0))
+				if((gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & BAT_DETECT_BIT)  == 0 && ((gBatFromZero & (1<< (gBatNowBuf[gIsChargingBatPos]))) == 0))
 				{
 					if(gBatNowBuf[gIsChargingBatPos] != gNowTwoBuf[0] && gBatNowBuf[gIsChargingBatPos] != gNowTwoBuf[1])
 					{
 						ChargingTimeTick = 0;
-						gPreChargingBatPos = gIsChargingBatPos;
+						//gPreChargingBatPos = gIsChargingBatPos;
 						if(gIsChargingBatPos >= gBatNumNow)
 						{
-							if(gBatNumNow%2)
-							{
-								gIsChargingBatPos =0;
-							}
-							else
-								gIsChargingBatPos =1;
+							gIsChargingBatPos =1;
 						}
 						else
 							gIsChargingBatPos++;	
@@ -1219,26 +1213,23 @@ void chargeHandler(void)
 				{
 					if(tempV > BAT_ZERO_SPEC_VOLT)
 						removeBat(gIsChargingBatPos);
-					if(gBatStateBuf[gBatNowBuf[gPreChargingBatPos]] & ((BAT_TYPE_ERROR) |(CHARGE_STATE_ERROR)))
+					if(gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] & ((BAT_TYPE_ERROR) |(CHARGE_STATE_ERROR)))
 					{
 						PwmControl(PWM_OFF);
-					}
-
-					if(gIsInTwoState)
-					{
-						ChargingTimeTick = 0;
-						gPreChargingBatPos = gIsChargingBatPos;
-						if(gIsChargingBatPos >= gBatNumNow)
+						if(gIsInTwoState)
 						{
-							if(gBatNumNow%2)
+							if((gNowTwoBuf[0] != gBatNowBuf[gIsChargingBatPos]) && (gNowTwoBuf[1] != gBatNowBuf[gIsChargingBatPos]))
 							{
-								gIsChargingBatPos =0;
+								ChargingTimeTick = 0;
+								//gPreChargingBatPos = gIsChargingBatPos;
+								if(gIsChargingBatPos >= gBatNumNow)
+								{
+									gIsChargingBatPos =1;
+								}
+								else
+									gIsChargingBatPos++;
 							}
-							else
-								gIsChargingBatPos =1;
 						}
-						else
-							gIsChargingBatPos++;
 					}
 					return;
 				}
